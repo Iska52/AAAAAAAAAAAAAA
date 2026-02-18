@@ -2,68 +2,91 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Мой облачный проект</title>
+    <title>BaaS</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background-color: #f4f4f9; }
-        .form-container { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 300px; }
-        input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #f4b400; border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        button:hover { background: #dfa400; }
+        body { font-family: 'Inter', sans-serif; background: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 500px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button#mainBtn { background: #007bff; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .post { background: #fff; border: 1px solid #eaeaea; padding: 15px; margin-top: 15px; border-radius: 8px; width: 100%; max-width: 500px; position: relative; }
+        .like-btn { cursor: pointer; border: none; background: #f8f9fa; padding: 5px 12px; border-radius: 20px; font-size: 14px; transition: 0.2s; }
+        .like-btn:hover { background: #e2e6ea; }
+        .time { font-size: 11px; color: #999; float: right; }
     </style>
 </head>
 <body>
 
-<div class="form-container">
-    <h3>Отправить заявку</h3>
-    <form id="feedbackForm">
-        <input type="text" id="userName" placeholder="Ваше имя" required>
-        <input type="email" id="userEmail" placeholder="Ваш Email" required>
-        <button type="submit">Отправить в облако</button>
-    </form>
-</div>
+    <div class="container">
+        <h3>Панель управления данными</h3>
+        <input type="text" id="name" placeholder="Имя профиля">
+        <input type="email" id="email" placeholder="Рабочий Email">
+        <button id="mainBtn">Опубликовать в облако</button>
+    </div>
 
-<script type="module">
-    // Импортируем модули Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    <div id="feed" style="width: 100%; max-width: 500px;"></div>
 
-    // ТВОИ КЛЮЧИ СО СКРИНШОТА
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-      apiKey: "AIzaSyDDQUDZAHu1eYxxEAjG1n0d1AfcUXtz1jE",
-      authDomain: "is-po233.firebaseapp.com",
-      projectId: "is-po233",
-      storageBucket: "is-po233.firebasestorage.app",
-      messagingSenderId: "1083602801160",
-      appId: "1:1083602801160:web:5f033d32c2d9efb0cbf7bd",
-      measurementId: "G-P5JR939L0K"
-    };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { 
+            getFirestore, collection, addDoc, query, orderBy, onSnapshot, 
+            serverTimestamp, updateDoc, doc, increment 
+        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-    // Инициализация
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        // КОНФИГУРАЦИЯ
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgUxR0Txafc_qA-rpdSzKn33265IfxsHU",
+            authDomain: "qazaq-a072e.firebaseapp.com",
+            projectId: "qazaq-a072e",
+            storageBucket: "qazaq-a072e.appspot.com",
+            messagingSenderId: "47025480090",
+            appId: "1:47025480090:web:3dd74ff29bc0c149f39a23",
+            measurementId: "G-9TE97NWMB9"
+        };
 
-    // Логика кнопки
-    document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        const nameInput = document.getElementById("userName").value;
-        const emailInput = document.getElementById("userEmail").value;
+        // МЕТОД: АТОМАРНОЕ ОБНОВЛЕНИЕ (LIKES)
+        window.processLike = async (id) => {
+            const docRef = doc(db, "requests", id);
+            try {
+                await updateDoc(docRef, { likes: increment(1) });
+            } catch (e) { console.error("Validation Error:", e.message); }
+        };
 
-        try {
-            // Запись в коллекцию "requests"
-            await addDoc(collection(db, "requests"), {
-                name: nameInput,
-                email: emailInput,
-                timestamp: new Date()
+        // МЕТОД: ЗАПИСЬ С ВАЛИДАЦИЕЙ
+        document.getElementById('mainBtn').onclick = async () => {
+            const btn = document.getElementById('mainBtn');
+            btn.disabled = true;
+            try {
+                await addDoc(collection(db, "requests"), {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    likes: 0,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('email').value = "";
+            } catch (e) { alert("Ошибка безопасности: Данные отклонены сервером."); }
+            btn.disabled = false;
+        };
+
+        // МЕТОД: REAL-TIME СИНХРОНИЗАЦИЯ
+        const q = query(collection(db, "requests"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                feed.innerHTML += `
+                    <div class="post">
+                        <span class="time">${data.timestamp?.toDate().toLocaleTimeString() || '...'}</span>
+                        <b>${data.name}</b>
+                        <p style="margin: 5px 0;">${data.email}</p>
+                        <button class="like-btn" onclick="processLike('${doc.id}')">👍 ${data.likes || 0}</button>
+                    </div>
+                `;
             });
-            alert("Готово! Данные сохранены в Firebase.");
-            document.getElementById("feedbackForm").reset();
-        } catch (error) {
-            console.error("Ошибка записи: ", error);
-            alert("Ошибка при отправке.");
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>

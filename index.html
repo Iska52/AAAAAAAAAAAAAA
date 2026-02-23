@@ -2,191 +2,252 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>BaaS с верификацией телефона</title>
+    <title>BaaS</title>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { width: 100%; max-width: 500px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        input[readonly] { background: #f8f9fa; }
-        button#mainBtn { background: #007bff; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        button#mainBtn:disabled { background: #6c757d; cursor: not-allowed; }
-        .post { background: #fff; border: 1px solid #eaeaea; padding: 15px; margin-top: 15px; border-radius: 8px; width: 100%; max-width: 500px; position: relative; }
-        .like-btn { cursor: pointer; border: none; background: #f8f9fa; padding: 5px 12px; border-radius: 20px; font-size: 14px; transition: 0.2s; }
+
+        .container { width: 100%; max-width: 500px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 16px; }
+        h3 { margin: 0 0 14px; font-size: 16px; }
+
+        input[type="text"], input[type="email"] { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; transition: border 0.2s; }
+        input:focus { border-color: #007bff; }
+
+        .btn { border: none; padding: 12px; border-radius: 6px; width: 100%; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-blue  { background: #007bff; color: white; }
+        .btn-blue:hover  { background: #0056b3; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-green:hover { background: #1e7e34; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .stats-panel { display: none; background: #f0f9f4; border: 1px solid #c3e6cb; border-radius: 8px; padding: 14px; margin-top: 12px; }
+        .stats-panel.visible { display: block; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #ddeee5; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #555; font-size: 13px; }
+        .stat-value { font-weight: 700; font-size: 15px; color: #155724; }
+
+        .search-box { width: 100%; max-width: 500px; position: relative; margin-bottom: 6px; }
+        .search-box input { width: 100%; padding: 12px 12px 12px 38px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin: 0; outline: none; transition: border 0.2s; }
+        .search-box input:focus { border-color: #007bff; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+
+        .hint { font-size: 12px; color: #888; min-height: 20px; padding-left: 2px; margin-bottom: 4px; }
+        .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+        .badge-live   { background: #d4edda; color: #155724; }
+        .badge-search { background: #fff3cd; color: #856404; }
+
+        #feed { width: 100%; max-width: 500px; }
+        .post { background: white; border: 1px solid #eaeaea; padding: 15px; margin-top: 12px; border-radius: 8px; }
+        .post-name  { font-weight: 600; font-size: 15px; }
+        .post-email { margin: 5px 0; color: #555; font-size: 14px; }
+        .post-time  { font-size: 11px; color: #aaa; float: right; }
+        .like-btn   { cursor: pointer; border: none; background: #f8f9fa; padding: 5px 12px; border-radius: 20px; font-size: 14px; transition: 0.2s; margin-top: 8px; }
         .like-btn:hover { background: #e2e6ea; }
-        .time { font-size: 11px; color: #999; float: right; }
-        .phone-display { font-size: 13px; color: #28a745; margin: 2px 0; }
-        .status { font-size: 12px; color: #666; margin-top: 5px; text-align: center; }
-        .error { color: #dc3545; }
-        .success { color: #28a745; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h3>Панель управления данными</h3>
-        <input type="text" id="name" placeholder="Имя профиля (мин. 3 символа)" required>
-        <input type="email" id="email" placeholder="Рабочий Email" required>
-        <input type="tel" id="phone" placeholder="+77001234567 (опционально для верификации)">
-        <div id="status" class="status"></div>
-        <button id="mainBtn">Опубликовать в облако</button>
+<div class="container">
+    <h3>Панель управления данными</h3>
+    <input type="text"  id="name"  placeholder="Имя профиля">
+    <input type="email" id="email" placeholder="Рабочий Email">
+    <button id="mainBtn" class="btn btn-blue">Опубликовать в облако</button>
+
+    <button id="statsBtn" class="btn btn-green">📊 Показать статистику коллекции</button>
+    <div id="statsPanel" class="stats-panel">
+        <div class="stat-row">
+            <span class="stat-label">📁 Всего записей</span>
+            <span class="stat-value" id="s-count">—</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">👍 Сумма всех лайков</span>
+            <span class="stat-value" id="s-sum">—</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">📈 Среднее лайков на запись</span>
+            <span class="stat-value" id="s-avg">—</span>
+        </div>
     </div>
+</div>
 
-    <div id="feed" style="width: 100%; max-width: 500px;"></div>
+<div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Поиск по имени (префикс)...">
+</div>
+<p class="hint" id="hint">
+    <span class="badge badge-live">● Live</span> Лента обновляется в реальном времени
+</p>
 
-    <script type="module">
-        // === ПОЛНЫЙ КОД С ВЕРИФИКАЦИЕЙ PHONE ===
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { 
-            getFirestore, collection, addDoc, query, orderBy, onSnapshot,
-            serverTimestamp, updateDoc, doc, increment, getDoc, setDoc 
-        } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+<div id="feed"></div>
 
-        // КОНФИГУРАЦИЯ FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyDDQUDZAHu1eYxxEAjG1n0d1AfcUXtz1jE",
-            authDomain: "is-po233.firebaseapp.com",
-            projectId: "is-po233",
-            storageBucket: "is-po233.firebasestorage.app",
-            messagingSenderId: "1083602801160",
-            appId: "1:1083602801160:web:5f033d32c2d9efb0cbf7bd",
-            measurementId: "G-P5JR939L0K"
-        };
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import {
+        getFirestore, collection, addDoc, query, orderBy, onSnapshot,
+        serverTimestamp, updateDoc, doc, increment,
+        // ── Идея 1 ──
+        getAggregateFromServer, count, sum, average,
+        // ── Идея 4 ──
+        where, getDocs, limit
+    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyDDQUDZAHu1eYxxEAjG1n0d1AfcUXtz1jE",
+        authDomain: "is-po233.firebaseapp.com",
+        projectId: "is-po233",
+        storageBucket: "is-po233.firebasestorage.app",
+        messagingSenderId: "1083602801160",
+        appId: "1:1083602801160:web:5f033d32c2d9efb0cbf7bd",
+        measurementId: "G-P5JR939L0K"
+    };
 
-        let authReady = false;
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
 
-        // === ФУНКЦИЯ 1: ПРОВЕРКА УНИКАЛЬНОСТИ PHONE ===
-        window.checkPhoneUnique = async (phone) => {
-            // Regex E.164: +? + 1-15 цифр (без букв)
-            if (!phone?.match(/^[+]?[1-9]\d{1,14}$/)) {
-                throw new Error("Формат: +77001234567 или 77001234567");
-            }
+    // ─── Общий шаблон карточки ──────────────────────────────────────────────
+    const renderPost = (id, data) => `
+        <div class="post">
+            <span class="post-time">${data.timestamp?.toDate().toLocaleTimeString('ru-RU') || '...'}</span>
+            <div class="post-name">${data.name}</div>
+            <div class="post-email">${data.email}</div>
+            <button class="like-btn" onclick="processLike('${id}')">👍 ${data.likes || 0}</button>
+        </div>`;
 
-            // Ждем авторизации
-            await waitForAuth();
+    // ─── Атомарный лайк (оригинальная логика) ──────────────────────────────
+    window.processLike = async (id) => {
+        try {
+            await updateDoc(doc(db, "requests", id), { likes: increment(1) });
+        } catch (e) { console.error("Like error:", e.message); }
+    };
 
-            // Проверяем existence в индексе /phones/{phone}
-            const phoneDocRef = doc(db, "phones", phone);
-            const phoneDoc = await getDoc(phoneDocRef);
-            if (phoneDoc.exists()) {
-                throw new Error("Этот номер уже зарегистрирован");
-            }
-            return true;
-        };
-
-        // Вспомогательная: ожидание auth
-        const waitForAuth = () => {
-            return new Promise((resolve) => {
-                if (authReady) return resolve();
-                const unsubscribe = onAuthStateChanged(auth, () => {
-                    if (auth.currentUser) {
-                        authReady = true;
-                        unsubscribe();
-                        resolve();
-                    }
-                });
+    // ─── Запись с валидацией (оригинальная логика) ──────────────────────────
+    document.getElementById('mainBtn').onclick = async () => {
+        const btn = document.getElementById('mainBtn');
+        btn.disabled = true;
+        try {
+            await addDoc(collection(db, "requests"), {
+                name:      document.getElementById('name').value,
+                email:     document.getElementById('email').value,
+                likes:     0,
+                timestamp: serverTimestamp()
             });
-        };
+            document.getElementById('name').value  = "";
+            document.getElementById('email').value = "";
+        } catch (e) {
+            alert("Ошибка безопасности: Данные отклонены сервером.");
+        }
+        btn.disabled = false;
+    };
 
-        // === ФУНКЦИЯ 2: АТОМАРНЫЙ ЛАЙК ===
-        window.processLike = async (id) => {
-            const docRef = doc(db, "requests", id);
-            try {
-                await updateDoc(docRef, { likes: increment(1) });
-            } catch (e) {
-                console.error("Ошибка лайка:", e.message);
-            }
-        };
 
-        // === ОСНОВНАЯ ФУНКЦИЯ: СОЗДАНИЕ ПОСТА ===
-        document.getElementById('mainBtn').onclick = async () => {
-            const btn = document.getElementById('mainBtn');
-            const status = document.getElementById('status');
-            
-            btn.disabled = true;
-            btn.textContent = "Публикация...";
-            status.textContent = "";
-            status.className = "status";
+    document.getElementById('statsBtn').onclick = async () => {
+        const btn   = document.getElementById('statsBtn');
+        const panel = document.getElementById('statsPanel');
+        btn.disabled    = true;
+        btn.textContent = "⏳ Запрос к серверу...";
 
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim() || null;
-
-            try {
-                // Клиентская валидация
-                if (name.length < 3) throw new Error("Имя: минимум 3 символа");
-                if (!email.match(/.*@.*\..*/)) throw new Error("Некорректный Email");
-
-                // Проверка phone (если заполнен)
-                if (phone) {
-                    status.textContent = "Проверяем номер...";
-                    await window.checkPhoneUnique(phone);
-                    status.innerHTML = '<span class="success">✅ Номер уникален</span>';
+        try {
+            // Один HTTP-запрос → три агрегата одновременно.
+            // Firestore считает всё на своей стороне — клиент
+            // получает только три числа, а не все документы.
+            const snapshot = await getAggregateFromServer(
+                collection(db, "requests"),
+                {
+                    totalPosts: count(),        // количество документов
+                    totalLikes: sum('likes'),   // сумма поля likes
+                    avgLikes:   average('likes')// среднее поля likes
                 }
+            );
 
-                // Авторизация
-                await waitForAuth();
+            const { totalPosts, totalLikes, avgLikes } = snapshot.data();
+            document.getElementById('s-count').textContent = totalPosts;
+            document.getElementById('s-sum').textContent   = totalLikes;
+            document.getElementById('s-avg').textContent   = (avgLikes ?? 0).toFixed(2);
+            panel.classList.add('visible');
+        } catch (e) {
+            alert("Ошибка агрегации: " + e.message);
+        }
 
-                // Создание поста
-                status.textContent = "Сохраняем в облако...";
-                const docRef = await addDoc(collection(db, "requests"), {
-                    name,
-                    email,
-                    phone,
-                    likes: 0,
-                    uid: auth.currentUser.uid,
-                    timestamp: serverTimestamp()
-                });
+        btn.disabled    = false;
+        btn.textContent = "🔄 Обновить статистику";
+    };
 
-                // Индексация уникальности phone
-                if (phone) {
-                    await setDoc(doc(db, "phones", phone), {
-                        claimedBy: auth.currentUser.uid,
-                        requestId: docRef.id,
-                        createdAt: serverTimestamp()
-                    });
-                }
 
-                // Успех
-                document.getElementById('name').value = "";
-                document.getElementById('email').value = "";
-                document.getElementById('phone').value = "";
-                status.innerHTML = '<span class="success">✅ Опубликовано!</span>';
-                
-            } catch (e) {
-                status.innerHTML = '<span class="error">❌ ' + e.message + '</span>';
-                console.error("Ошибка:", e);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Опубликовать в облако";
-            }
-        };
+    // ─── Real-time лента с управляемой подпиской ────────────────────────────
+    const feed = document.getElementById('feed');
+    const hint = document.getElementById('hint');
+    let unsubscribe = null;
 
-        // === REAL-TIME ФИД ===
+    const startLiveFeed = () => {
+        if (unsubscribe) return; // уже подписаны
         const q = query(collection(db, "requests"), orderBy("timestamp", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const feed = document.getElementById('feed');
+        unsubscribe = onSnapshot(q, (snapshot) => {
             feed.innerHTML = "";
-            snapshot.forEach((docSnapshot) => {
-                const data = docSnapshot.data();
-                const phoneHtml = data.phone ? `<div class="phone-display">📱 ${data.phone}</div>` : '';
-                feed.innerHTML += `
-                    <div class="post">
-                        <span class="time">${data.timestamp?.toDate().toLocaleTimeString() || '...'}</span>
-                        <b>${data.name}</b>
-                        <p style="margin: 5px 0;">${data.email}</p>
-                        ${phoneHtml}
-                        <button class="like-btn" onclick="processLike('${docSnapshot.id}')">
-                            👍 ${data.likes || 0}
-                        </button>
-                    </div>
-                `;
-            });
+            snapshot.forEach(d => feed.innerHTML += renderPost(d.id, d.data()));
         });
-    </script>
+        hint.innerHTML = `<span class="badge badge-live">● Live</span> Лента обновляется в реальном времени`;
+    };
+
+    const stopLiveFeed = () => {
+        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    };
+
+
+    let debounceTimer = null;
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        // Debounce 300ms — не спамим запросами на каждый символ
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => runSearch(e.target.value.trim()), 300);
+    });
+
+    const runSearch = async (term) => {
+        if (!term) {
+            // Поле очищено → возвращаемся в режим real-time
+            startLiveFeed();
+            return;
+        }
+
+        // Пока идёт поиск — WebSocket не нужен, отписываемся
+        stopLiveFeed();
+
+        // Диапазонный запрос: name >= "Al"  AND  name <= "Al\uf8ff"
+        // \uf8ff (U+F8FF) — наибольший символ Unicode Private Use Area.
+        // Любая строка с префиксом "Al" (Alex, Alice, Альберт...) 
+        // всегда МЕНЬШЕ "Al\uf8ff", поэтому диапазон охватывает все продолжения.
+        const q = query(
+            collection(db, "requests"),
+            where("name", ">=", term),
+            where("name", "<=", term + "\uf8ff"),
+            orderBy("name"),   // тот же field, что и в where — индекс не нужен
+            limit(20)
+        );
+
+        try {
+            const snapshot = await getDocs(q);
+            feed.innerHTML = "";
+
+            if (snapshot.empty) {
+                feed.innerHTML = `
+                    <p style="text-align:center; color:#999; margin-top:20px;">
+                        😶 По запросу «${term}» ничего не найдено
+                    </p>`;
+                hint.innerHTML = `<span class="badge badge-search">⚑ Поиск</span> Результатов: 0`;
+            } else {
+                snapshot.forEach(d => feed.innerHTML += renderPost(d.id, d.data()));
+                hint.innerHTML = `<span class="badge badge-search">⚑ Поиск</span> Найдено: ${snapshot.size} записей`;
+            }
+        } catch (e) {
+            // Если нужен индекс — Firebase выведет ссылку в консоль (F12)
+            console.error("Search error:", e.message);
+            feed.innerHTML = `<p style="color:red; text-align:center;">⚠️ Ошибка. Смотри консоль (F12).</p>`;
+        }
+    };
+
+    // ─── Запуск при загрузке страницы ───────────────────────────────────────
+    startLiveFeed();
+</script>
+
 </body>
 </html>

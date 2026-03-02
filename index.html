@@ -1,272 +1,276 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BaaS + Auth System</title>
-    <style>
-        * { box-sizing: border-box; transition: all 0.2s ease; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; color: #1c1e21; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BaaS + Auth + Image Upload</title>
 
-        .container { width: 100%; max-width: 500px; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); margin-bottom: 16px; }
-        
-        .auth-bar { background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05); width: 100%; max-width: 500px; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #007bff; object-fit: cover; }
-        .logout-btn { background: #fee2e2; color: #dc2626; padding: 8px 16px; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: auto; }
-        .logout-btn:hover { background: #fecaca; }
+<style>
+* { box-sizing: border-box; transition: all 0.2s ease; }
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin: 0;
+    color: #1c1e21;
+}
+.container {
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    margin-bottom: 16px;
+}
+.auth-bar {
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    width: 100%;
+    max-width: 500px;
+}
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid #007bff;
+    object-fit: cover;
+}
+.logout-btn {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: auto;
+}
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+button {
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+#mainBtn { background: #007bff; color: white; width: 100%; }
+#mainBtn:hover { background: #0056b3; }
 
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.1); }
-        
-        button#mainBtn { background: #007bff; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; font-size: 16px; }
-        button#mainBtn:hover { background: #0056b3; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .post { background: white; border: 1px solid #e5e7eb; padding: 16px; margin-top: 12px; border-radius: 12px; width: 100%; }
-        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .post-avatar { width: 32px; height: 32px; border-radius: 50%; background: #eee; }
-        .time { font-size: 12px; color: #65676b; margin-left: auto; }
-        .like-btn { cursor: pointer; border: 1px solid #e4e6eb; background: #f0f2f5; padding: 6px 14px; border-radius: 20px; margin-top: 10px; font-weight: 600; color: #050505; }
-        .like-btn:hover { background: #e4e6eb; }
-
-        .stats-panel { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 15px; margin-top: 15px; }
-        .stats-panel.visible { display: block; animation: fadeIn 0.3s ease; }
-        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dcfce7; font-size: 14px; }
-        .stat-row:last-child { border-bottom: none; }
-
-        .search-box { width: 100%; max-width: 500px; position: relative; margin-bottom: 8px; }
-        .search-box input { padding-left: 40px; background: #fff; border: none; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
-        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #888; }
-        .hint { font-size: 13px; color: #65676b; width: 100%; max-width: 500px; margin: 4px 0 12px 5px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+.post {
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
+    margin-top: 12px;
+    border-radius: 12px;
+    width: 100%;
+}
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.post-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+.like-btn {
+    margin-top: 10px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #f0f2f5;
+}
+.search-box {
+    width: 100%;
+    max-width: 500px;
+}
+</style>
 </head>
+
 <body>
 
 <div id="authSection" class="container" style="text-align:center;">
-    <h2 style="margin-top:0">Добро пожаловать</h2>
-    <button id="loginBtn" style="background:#4285F4; color:white; border:none; padding:12px 24px; border-radius:8px; font-weight:600; cursor:pointer;">
+    <h2>Добро пожаловать</h2>
+    <button id="loginBtn" style="background:#4285F4; color:white;">
         Войти через Google
     </button>
 </div>
 
 <div id="userInfo" style="display:none" class="auth-bar">
-    <img id="userPhoto" class="user-avatar" src="" alt="Avatar">
+    <img id="userPhoto" class="user-avatar">
     <span id="userName" style="font-weight:bold"></span>
     <button id="logoutBtn" class="logout-btn">Выйти</button>
 </div>
 
 <div id="messageForm" class="container" style="display:none">
-    <h3 style="margin-top:0">Новая публикация</h3>
-    <input type="text" id="nameDisplay" readonly style="background:#f9f9f9; color:#666; cursor:not-allowed">
+    <h3>Новая публикация</h3>
+    <input type="text" id="nameDisplay" readonly>
     <input type="text" id="contentInput" placeholder="Что у вас нового?">
+    <input type="file" id="imageInput" accept="image/*">
     <button id="mainBtn">Опубликовать</button>
-
-    <button id="statsBtn" style="margin-top:12px; background:#10b981; color:white; border:none; padding:10px; border-radius:8px; width:100%; font-weight:600; cursor:pointer">
-        📊 Показать статистику ленты
-    </button>
-
-    <div id="statsPanel" class="stats-panel">
-        <div class="stat-row"><span>Всего записей</span><strong id="s-count">0</strong></div>
-        <div class="stat-row"><span>Всего лайков</span><strong id="s-sum">0</strong></div>
-        <div class="stat-row"><span>Среднее (лайк/пост)</span><strong id="s-avg">0</strong></div>
-    </div>
 </div>
 
 <div class="search-box">
-    <span class="search-icon">🔍</span>
     <input type="text" id="searchInput" placeholder="Поиск авторов...">
 </div>
-<p class="hint" id="hint">● Загрузка ленты...</p>
 
 <div id="feed" style="width:100%; max-width:500px"></div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import {
-        getFirestore, collection, addDoc, query, orderBy, onSnapshot,
-        serverTimestamp, updateDoc, doc, increment,
-        getAggregateFromServer, count, sum, average,
-        where, getDocs, limit
-    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-    import {
-        getAuth, signInWithPopup, GoogleAuthProvider,
-        signOut, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-    // Конфигурация Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyDDQUDZAHu1eYxxEAjG1n0d1AfcUXtz1jE",
-        authDomain: "is-po233.firebaseapp.com",
-        projectId: "is-po233",
-        storageBucket: "is-po233.firebasestorage.app",
-        messagingSenderId: "1083602801160",
-        appId: "1:1083602801160:web:5f033d32c2d9efb0cbf7bd"
-    };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import {
+    getFirestore, collection, addDoc, query, orderBy, onSnapshot,
+    serverTimestamp, updateDoc, doc, increment,
+    where, getDocs, limit
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import {
+    getAuth, signInWithPopup, GoogleAuthProvider,
+    signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import {
+    getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "XXXX",
+    appId: "XXXX"
+};
 
-    // DOM Элементы
-    const feed = document.getElementById('feed');
-    const contentInput = document.getElementById('contentInput');
-    const mainBtn = document.getElementById('mainBtn');
-    const hint = document.getElementById('hint');
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
+const provider = new GoogleAuthProvider();
 
-    /* --- АВТОРИЗАЦИЯ --- */
-    document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
-    document.getElementById('logoutBtn').onclick = () => signOut(auth);
+const feed = document.getElementById('feed');
+const contentInput = document.getElementById('contentInput');
+const imageInput = document.getElementById('imageInput');
+const mainBtn = document.getElementById('mainBtn');
 
-    onAuthStateChanged(auth, user => {
-        const authSection = document.getElementById('authSection');
-        const userInfo = document.getElementById('userInfo');
-        const messageForm = document.getElementById('messageForm');
+document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
+document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-        if (user) {
-            authSection.style.display = 'none';
-            userInfo.style.display = 'flex';
-            messageForm.style.display = 'block';
-            document.getElementById('userName').innerText = user.displayName;
-            document.getElementById('userPhoto').src = user.photoURL;
-            document.getElementById('nameDisplay').value = user.displayName;
-        } else {
-            authSection.style.display = 'block';
-            userInfo.style.display = 'none';
-            messageForm.style.display = 'none';
-        }
+onAuthStateChanged(auth, user => {
+    if (user) {
+        authSection.style.display = 'none';
+        userInfo.style.display = 'flex';
+        messageForm.style.display = 'block';
+        userName.innerText = user.displayName;
+        userPhoto.src = user.photoURL;
+        nameDisplay.value = user.displayName;
+    } else {
+        authSection.style.display = 'block';
+        userInfo.style.display = 'none';
+        messageForm.style.display = 'none';
+    }
+});
+
+function createPostHTML(d) {
+    const data = d.data();
+    return `
+    <div class="post">
+        <div class="post-header">
+            <img src="${data.photo}" class="post-avatar">
+            <strong>${data.name}</strong>
+        </div>
+        <p>${data.text || ""}</p>
+        ${data.image ? `<img src="${data.image}" style="width:100%; border-radius:10px;">` : ""}
+        <button class="like-btn" onclick="window.processLike('${d.id}')">
+            👍 ${data.likes || 0}
+        </button>
+    </div>`;
+}
+
+const q = query(collection(db, "requests"), orderBy("timestamp", "desc"), limit(30));
+onSnapshot(q, snapshot => {
+    feed.innerHTML = "";
+    snapshot.forEach(doc => {
+        feed.innerHTML += createPostHTML(doc);
     });
+});
 
-    /* --- ФУНКЦИЯ ОТРИСОВКИ ПОСТА --- */
-    const createPostHTML = (d) => {
-        const data = d.data();
-        const time = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'только что';
-        return `
-        <div class="post">
-            <div class="post-header">
-                <img src="${data.photo || 'https://via.placeholder.com/32'}" class="post-avatar">
-                <div style="display:flex; flex-direction:column">
-                    <span style="font-weight:700; font-size:14px">${data.name}</span>
-                    <span style="font-size:11px; color:#888">${data.email || ''}</span>
-                </div>
-                <span class="time">${time}</span>
-            </div>
-            <p style="margin:8px 0; line-height:1.4">${data.text}</p>
-            <button class="like-btn" onclick="window.processLike('${d.id}')">
-                👍 <span id="like-count-${d.id}">${data.likes || 0}</span>
-            </button>
-        </div>`;
-    };
+mainBtn.onclick = async () => {
+    const text = contentInput.value.trim();
+    const file = imageInput.files[0];
 
-    /* --- ЛЕНТА (REALTIME) --- */
-    let unsubscribe = null;
-    const startLive = () => {
-        if (unsubscribe) return;
-        const q = query(collection(db, "requests"), orderBy("timestamp", "desc"), limit(30));
-        unsubscribe = onSnapshot(q, (snapshot) => {
-            feed.innerHTML = "";
-            snapshot.forEach(doc => {
-                feed.innerHTML += createPostHTML(doc);
-            });
-            hint.innerText = "● Live режим (последние 30)";
-        }, (error) => {
-            console.error("Ошибка ленты:", error);
-            hint.innerText = "Ошибка доступа. Проверьте правила БД.";
+    if (!text && !file) return alert("Добавьте текст или изображение!");
+
+    mainBtn.disabled = true;
+
+    try {
+        let imageUrl = null;
+
+        if (file) {
+            const imageRef = ref(storage, `posts/${Date.now()}_${file.name}`);
+            await uploadBytes(imageRef, file);
+            imageUrl = await getDownloadURL(imageRef);
+        }
+
+        await addDoc(collection(db, "requests"), {
+            name: auth.currentUser.displayName,
+            photo: auth.currentUser.photoURL,
+            text: text || "",
+            image: imageUrl,
+            likes: 0,
+            timestamp: serverTimestamp()
         });
-    };
 
-    const stopLive = () => {
-        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-    };
+        contentInput.value = "";
+        imageInput.value = "";
 
-    /* --- ДЕЙСТВИЯ --- */
-    mainBtn.onclick = async () => {
-        const text = contentInput.value.trim();
-        if (!text) return alert("Пожалуйста, напишите что-нибудь!");
-
-        mainBtn.disabled = true;
-        try {
-            await addDoc(collection(db, "requests"), {
-                name: auth.currentUser.displayName,
-                email: auth.currentUser.email,
-                photo: auth.currentUser.photoURL,
-                text: text,
-                likes: 0,
-                timestamp: serverTimestamp()
-            });
-            contentInput.value = "";
-        } catch (e) {
-            alert("Ошибка при отправке: " + e.message);
-        } finally {
-            mainBtn.disabled = false;
-        }
-    };
-
-    window.processLike = async (postId) => {
-        try {
-            const postRef = doc(db, "requests", postId);
-            await updateDoc(postRef, { likes: increment(1) });
-        } catch (e) {
-            console.error("Ошибка лайка:", e);
-        }
-    };
-
-    /* --- ПОИСК --- */
-    let searchTimeout = null;
-    document.getElementById('searchInput').oninput = (e) => {
-        clearTimeout(searchTimeout);
-        const term = e.target.value.trim();
-        searchTimeout = setTimeout(() => runSearch(term), 400);
-    };
-
-    async function runSearch(term) {
-        if (!term) { startLive(); return; }
-        stopLive();
-        hint.innerText = "🔍 Поиск...";
-
-        try {
-            const q = query(
-                collection(db, "requests"),
-                where("name", ">=", term),
-                where("name", "<=", term + "\uf8ff"),
-                limit(20)
-            );
-            const snap = await getDocs(q);
-            feed.innerHTML = snap.empty ? "<p style='text-align:center; padding:20px;'>Ничего не найдено</p>" : "";
-            snap.forEach(d => { feed.innerHTML += createPostHTML(d); });
-            hint.innerText = `Найдено: ${snap.size}`;
-        } catch (e) {
-            hint.innerText = "Ошибка поиска. Нужен индекс.";
-            console.error(e);
-        }
+    } catch (e) {
+        alert("Ошибка: " + e.message);
     }
 
-    /* --- СТАТИСТИКА --- */
-    document.getElementById('statsBtn').onclick = async () => {
-        const btn = document.getElementById('statsBtn');
-        btn.innerText = "⌛ Считаю...";
-        try {
-            const snapshot = await getAggregateFromServer(collection(db, "requests"), {
-                count: count(),
-                totalLikes: sum("likes"),
-                avgLikes: average("likes")
-            });
-            const res = snapshot.data();
-            document.getElementById('s-count').innerText = res.count;
-            document.getElementById('s-sum').innerText = res.totalLikes;
-            document.getElementById('s-avg').innerText = (res.avgLikes || 0).toFixed(2);
-            document.getElementById('statsPanel').classList.add("visible");
-        } catch (e) {
-            alert("Не удалось загрузить агрегаты. Проверьте консоль.");
-        } finally {
-            btn.innerText = "📊 Показать статистику ленты";
-        }
-    };
+    mainBtn.disabled = false;
+};
 
-    // Инициализация
-    startLive();
+window.processLike = async (id) => {
+    const postRef = doc(db, "requests", id);
+    await updateDoc(postRef, { likes: increment(1) });
+};
+
+document.getElementById('searchInput').oninput = async (e) => {
+    const term = e.target.value.trim();
+    if (!term) return;
+
+    const q = query(
+        collection(db, "requests"),
+        where("name", ">=", term),
+        where("name", "<=", term + "\uf8ff"),
+        limit(20)
+    );
+
+    const snap = await getDocs(q);
+    feed.innerHTML = "";
+    snap.forEach(doc => {
+        feed.innerHTML += createPostHTML(doc);
+    });
+};
+
 </script>
 </body>
 </html>

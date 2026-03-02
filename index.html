@@ -233,6 +233,7 @@ mainBtn.onclick = async () => {
         }
 
         await addDoc(collection(db, "requests"), {
+            uid: auth.currentUser.uid,
             name: auth.currentUser.displayName,
             photo: auth.currentUser.photoURL,
             text: text || "",

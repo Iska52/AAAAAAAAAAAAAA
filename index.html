@@ -144,9 +144,6 @@ import {
     getAuth, signInWithPopup, GoogleAuthProvider,
     signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import {
-    getStorage, ref, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDQUDZAHu1eYxxEAjG1n0d1AfcUXtz1jE",
@@ -160,7 +157,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const storage = getStorage(app);
 const provider = new GoogleAuthProvider();
 
 const feed = document.getElementById('feed');
@@ -188,13 +184,16 @@ onAuthStateChanged(auth, user => {
 
 function createPostHTML(d) {
     const data = d.data();
-    // Защита от XSS
-    const safeName = data.name?.replace(/</g, "&lt;") || "";
+    const safeName = data.name?.replace(/</g, "&lt;") || "Аноним";
     const safeText = data.text?.replace(/</g, "&lt;") || "";
+    const avatarSrc = data.photo
+        ? data.photo
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=007bff&color=fff`;
+
     return `
     <div class="post">
         <div class="post-header">
-            <img src="${data.photo}" class="post-avatar">
+            <img src="${avatarSrc}" class="post-avatar">
             <strong>${safeName}</strong>
         </div>
         <p>${safeText}</p>
@@ -205,10 +204,31 @@ function createPostHTML(d) {
     </div>`;
 }
 
+// Сжатие фото через Canvas — без Storage, без CORS
+function compressImage(file, maxWidth = 800, quality = 0.7) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const scale = Math.min(1, maxWidth / img.width);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// Лента в реальном времени
 const q = query(collection(db, "requests"), orderBy("timestamp", "desc"), limit(30));
 onSnapshot(q, snapshot => {
     feed.innerHTML = "";
-    snapshot.forEach(doc => feed.innerHTML += createPostHTML(doc));
+    snapshot.forEach(d => feed.innerHTML += createPostHTML(d));
 });
 
 mainBtn.onclick = async () => {
@@ -216,20 +236,16 @@ mainBtn.onclick = async () => {
     const file = imageInput.files[0];
 
     if (!text && !file) return alert("Добавьте текст или изображение!");
-
-    // ✅ Проверка авторизации
     if (!auth.currentUser) return alert("Вы не авторизованы!");
+    if (file && file.size > 5 * 1024 * 1024) return alert("Файл слишком большой! Максимум 5MB");
 
     mainBtn.disabled = true;
     mainBtn.textContent = "Загрузка...";
 
     try {
-        let imageUrl = null;
-
+        let imageBase64 = null;
         if (file) {
-            const imageRef = ref(storage, `posts/${Date.now()}_${file.name}`);
-            await uploadBytes(imageRef, file);
-            imageUrl = await getDownloadURL(imageRef);
+            imageBase64 = await compressImage(file);
         }
 
         await addDoc(collection(db, "requests"), {
@@ -237,7 +253,7 @@ mainBtn.onclick = async () => {
             name: auth.currentUser.displayName,
             photo: auth.currentUser.photoURL,
             text: text || "",
-            image: imageUrl,
+            image: imageBase64,
             likes: 0,
             timestamp: serverTimestamp()
         });
@@ -246,11 +262,9 @@ mainBtn.onclick = async () => {
         imageInput.value = "";
 
     } catch (e) {
-        // ✅ Подробный лог для отладки
         console.error("Ошибка публикации:", e);
         alert("Ошибка: " + e.message);
     } finally {
-        // ✅ finally гарантирует что кнопка всегда разблокируется
         mainBtn.disabled = false;
         mainBtn.textContent = "Опубликовать";
     }
@@ -260,14 +274,22 @@ window.processLike = async (id) => {
     await updateDoc(doc(db, "requests", id), { likes: increment(1) });
 };
 
+// Поиск по авторам
+let liveUnsubscribe = null;
+
 document.getElementById('searchInput').oninput = async (e) => {
     const term = e.target.value.trim();
+
     if (!term) {
-        // Если поле очищено — возвращаем общую ленту
+        // Возвращаем живую ленту
+        if (liveUnsubscribe) liveUnsubscribe();
+        liveUnsubscribe = onSnapshot(q, snapshot => {
+            feed.innerHTML = "";
+            snapshot.forEach(d => feed.innerHTML += createPostHTML(d));
+        });
         return;
     }
 
-    // ✅ Исправлен \uf8ff (был \\uf8ff — это баг)
     const searchQ = query(
         collection(db, "requests"),
         where("name", ">=", term),
@@ -277,7 +299,7 @@ document.getElementById('searchInput').oninput = async (e) => {
 
     const snap = await getDocs(searchQ);
     feed.innerHTML = "";
-    snap.forEach(doc => feed.innerHTML += createPostHTML(doc));
+    snap.forEach(d => feed.innerHTML += createPostHTML(d));
 };
 </script>
 </body>

@@ -3,142 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BaaS + Auth + Image Upload</title>
-
+<title>Личные сообщения</title>
 <style>
-* { box-sizing: border-box; transition: all 0.2s ease; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Inter', -apple-system, sans-serif;
-    background: #f0f2f5;
+    background: #eef0f4;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    margin: 0;
+    padding: 24px 16px;
+    min-height: 100vh;
     color: #1c1e21;
 }
-.container {
-    width: 100%;
-    max-width: 500px;
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.08);
-    margin-bottom: 16px;
-}
-.auth-bar {
-    background: #fff;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.05);
-    width: 100%;
-    max-width: 500px;
-}
-.user-avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    border: 2px solid #007bff;
-    object-fit: cover;
-}
-.logout-btn {
-    background: #fee2e2;
-    color: #dc2626;
-    padding: 8px 16px;
-    font-size: 14px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    margin-left: auto;
-}
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-}
-button {
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-#mainBtn { background: #007bff; color: white; width: 100%; }
-#mainBtn:hover { background: #0056b3; }
 
-.post {
-    background: white;
-    border: 1px solid #e5e7eb;
-    padding: 16px;
-    margin-top: 12px;
-    border-radius: 12px;
+/* ── Auth: Login screen ── */
+.login-card {
     width: 100%;
+    max-width: 520px;
+    background: #fff;
+    padding: 32px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    text-align: center;
 }
-.post-header {
+.login-card h2 { font-size: 20px; margin-bottom: 20px; }
+#loginBtn {
+    background: #4285F4;
+    color: white;
+    padding: 13px 0;
+    border-radius: 10px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-size: 15px;
+}
+#loginBtn:hover { background: #3367d6; }
+
+/* ── Auth bar (top strip) ── */
+.auth-bar {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    padding: 14px 18px;
+    border-radius: 16px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
 }
-.post-avatar {
-    width: 32px;
-    height: 32px;
+.auth-avatar {
+    width: 46px; height: 46px;
     border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
 }
-.like-btn {
-    margin-top: 10px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: #f0f2f5;
+.auth-info { display: flex; flex-direction: column; gap: 2px; }
+.auth-name  { font-weight: 700; font-size: 15px; }
+.logout-link {
+    font-size: 13px;
+    color: #e53e3e;
+    cursor: pointer;
+    font-weight: 500;
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
 }
-.search-box {
+.logout-link:hover { text-decoration: underline; }
+
+/* ── Main card ── */
+.main-card {
     width: 100%;
-    max-width: 500px;
+    max-width: 520px;
+    background: #fff;
+    padding: 22px 22px 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    margin-bottom: 12px;
+}
+
+/* User list */
+.section-label {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 14px;
+}
+.user-list {
+    display: flex;
+    gap: 18px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-bottom: 20px;
+}
+.user-list::-webkit-scrollbar { display: none; }
+
+.user-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.user-item-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid transparent;
+    transition: border-color 0.2s;
+}
+.user-item:hover .user-item-avatar,
+.user-item.active .user-item-avatar { border-color: #3b82f6; }
+.user-item span {
+    font-size: 12px;
+    color: #444;
+    max-width: 60px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Chat title */
+.chat-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 14px;
+}
+
+/* Chat bubble box */
+.chat-box {
+    border: 1px solid #e8eaed;
+    border-radius: 12px;
+    height: 340px;
+    overflow-y: auto;
+    padding: 16px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd transparent;
+}
+.msg {
+    max-width: 68%;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 14.5px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+.msg.received {
+    background: #e9ecef;
+    color: #1c1e21;
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+}
+.msg.sent {
+    background: #3b82f6;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+}
+
+/* ── Input row (below card) ── */
+.chat-input-row {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.chat-input-row input {
+    flex: 1;
+    padding: 13px 18px;
+    border: 1px solid #dde0e6;
+    border-radius: 12px;
+    font-size: 14px;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    transition: border-color 0.2s;
+}
+.chat-input-row input:focus { border-color: #3b82f6; }
+.send-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(59,130,246,.35);
+    transition: background 0.2s;
+}
+.send-btn:hover { background: #2563eb; }
+
+.empty-hint {
+    font-size: 13px;
+    color: #bbb;
+    text-align: center;
+    padding: 8px 0;
 }
 </style>
 </head>
-
 <body>
 
-<div id="authSection" class="container" style="text-align:center;">
+<!-- LOGIN -->
+<div id="authSection" class="login-card">
     <h2>Добро пожаловать</h2>
-    <button id="loginBtn" style="background:#4285F4; color:white;">
-        Войти через Google
-    </button>
+    <button id="loginBtn">Войти через Google</button>
 </div>
 
+<!-- AUTH BAR -->
 <div id="userInfo" style="display:none" class="auth-bar">
-    <img id="userPhoto" class="user-avatar">
-    <span id="userName" style="font-weight:bold"></span>
-    <button id="logoutBtn" class="logout-btn">Выйти</button>
+    <img id="userPhoto" class="auth-avatar" src="" alt="">
+    <div class="auth-info">
+        <span id="userName" class="auth-name"></span>
+        <button id="logoutBtn" class="logout-link">Выйти</button>
+    </div>
 </div>
 
-<div id="messageForm" class="container" style="display:none">
-    <h3>Новая публикация</h3>
-    <input type="text" id="nameDisplay" readonly>
-    <input type="text" id="contentInput" placeholder="Что у вас нового?">
-    <input type="file" id="imageInput" accept="image/*">
-    <button id="mainBtn">Опубликовать</button>
+<!-- MAIN CARD -->
+<div id="dmSection" style="display:none" class="main-card">
+    <p class="section-label">Выберите собеседника:</p>
+    <div id="userList" class="user-list">
+        <p class="empty-hint">Загрузка...</p>
+    </div>
+
+    <div id="chatArea" style="display:none">
+        <p id="chatTitle" class="chat-title">Чат с:</p>
+        <div id="chatBox" class="chat-box"></div>
+    </div>
 </div>
 
-<div class="search-box">
-    <input type="text" id="searchInput" placeholder="Поиск авторов...">
+<!-- INPUT ROW (outside card, always visible after login) -->
+<div id="inputRow" style="display:none" class="chat-input-row">
+    <input type="text" id="msgInput" placeholder="Ваше сообщение...">
+    <button class="send-btn" id="sendBtn">&#9658;</button>
 </div>
-
-<div id="feed" style="width:100%; max-width:500px"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
-    getFirestore, collection, addDoc, query, orderBy, onSnapshot,
-    serverTimestamp, updateDoc, doc, increment, where, getDocs, limit
+    getFirestore, collection, addDoc, query,
+    orderBy, onSnapshot, serverTimestamp,
+    doc, setDoc, getDocs, where, limit
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 import {
     getAuth, signInWithPopup, GoogleAuthProvider,
@@ -154,153 +273,138 @@ const firebaseConfig = {
     appId: "1:1083602801160:web:5f033d32c2d9efb0cbf7bd"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const feed = document.getElementById('feed');
-const contentInput = document.getElementById('contentInput');
-const imageInput = document.getElementById('imageInput');
-const mainBtn = document.getElementById('mainBtn');
+let currentUser     = null;
+let selectedUser    = null;
+let unsubscribeChat = null;
 
-document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
+// ─── Auth ─────────────────────────────────────────────
+document.getElementById('loginBtn').onclick  = () => signInWithPopup(auth, provider);
 document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
     if (user) {
-        authSection.style.display = 'none';
-        userInfo.style.display = 'flex';
-        messageForm.style.display = 'block';
-        userName.innerText = user.displayName;
-        userPhoto.src = user.photoURL;
-        nameDisplay.value = user.displayName;
+        currentUser = user;
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('userInfo').style.display   = 'flex';
+        document.getElementById('dmSection').style.display  = 'block';
+        document.getElementById('inputRow').style.display   = 'flex';
+
+        document.getElementById('userName').innerText = user.displayName;
+        document.getElementById('userPhoto').src = user.photoURL
+            || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName)}&background=3b82f6&color=fff&bold=true`;
+
+        // Save/update profile
+        await setDoc(doc(db, 'users', user.uid), {
+            uid:   user.uid,
+            name:  user.displayName,
+            photo: user.photoURL || null
+        }, { merge: true });
+
+        loadUsers();
     } else {
-        authSection.style.display = 'block';
-        userInfo.style.display = 'none';
-        messageForm.style.display = 'none';
+        currentUser = selectedUser = null;
+        if (unsubscribeChat) unsubscribeChat();
+        document.getElementById('authSection').style.display = 'block';
+        document.getElementById('userInfo').style.display   = 'none';
+        document.getElementById('dmSection').style.display  = 'none';
+        document.getElementById('inputRow').style.display   = 'none';
     }
 });
 
-function createPostHTML(d) {
-    const data = d.data();
-    const safeName = data.name?.replace(/</g, "&lt;") || "Аноним";
-    const safeText = data.text?.replace(/</g, "&lt;") || "";
-    const avatarSrc = data.photo
-        ? data.photo
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=007bff&color=fff`;
+// ─── User list ────────────────────────────────────────
+async function loadUsers() {
+    const snap = await getDocs(collection(db, 'users'));
+    const list = document.getElementById('userList');
+    list.innerHTML = '';
+    let count = 0;
 
-    return `
-    <div class="post">
-        <div class="post-header">
-            <img src="${avatarSrc}" class="post-avatar">
-            <strong>${safeName}</strong>
-        </div>
-        <p>${safeText}</p>
-        ${data.image ? `<img src="${data.image}" style="width:100%; border-radius:10px;">` : ""}
-        <button class="like-btn" onclick="window.processLike('${d.id}')">
-            👍 ${data.likes || 0}
-        </button>
-    </div>`;
+    snap.forEach(d => {
+        const u = d.data();
+        if (u.uid === currentUser.uid) return;
+        count++;
+
+        const avatar = u.photo
+            || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=14b8a6&color=fff&bold=true`;
+        const firstName = u.name.split(' ')[0];
+
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        div.dataset.uid = u.uid;
+        div.innerHTML = `<img src="${avatar}" class="user-item-avatar"><span>${firstName}</span>`;
+        div.onclick = () => selectUser(u, div);
+        list.appendChild(div);
+    });
+
+    if (!count) list.innerHTML = '<p class="empty-hint">Нет других пользователей</p>';
 }
 
-// Сжатие фото через Canvas — без Storage, без CORS
-function compressImage(file, maxWidth = 800, quality = 0.7) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const scale = Math.min(1, maxWidth / img.width);
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL('image/jpeg', quality));
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+// ─── Select partner ────────────────────────────────────
+function selectUser(user, el) {
+    selectedUser = user;
+    document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+
+    document.getElementById('chatArea').style.display = 'block';
+    document.getElementById('chatTitle').innerText = `Чат с: ${user.name}`;
+    document.getElementById('chatBox').innerHTML = '';
+    document.getElementById('msgInput').focus();
+
+    openChat();
+}
+
+// ─── Realtime chat ─────────────────────────────────────
+function convId(a, b) { return [a, b].sort().join('_'); }
+
+function openChat() {
+    if (unsubscribeChat) unsubscribeChat();
+
+    const cid = convId(currentUser.uid, selectedUser.uid);
+    const q = query(
+        collection(db, 'messages'),
+        where('conversationId', '==', cid),
+        orderBy('timestamp', 'asc'),
+        limit(100)
+    );
+
+    unsubscribeChat = onSnapshot(q, snap => {
+        const box = document.getElementById('chatBox');
+        box.innerHTML = '';
+        snap.forEach(d => {
+            const data = d.data();
+            const div  = document.createElement('div');
+            div.className = `msg ${data.senderId === currentUser.uid ? 'sent' : 'received'}`;
+            div.textContent = data.text;
+            box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
     });
 }
 
-// Лента в реальном времени
-const q = query(collection(db, "requests"), orderBy("timestamp", "desc"), limit(30));
-onSnapshot(q, snapshot => {
-    feed.innerHTML = "";
-    snapshot.forEach(d => feed.innerHTML += createPostHTML(d));
+// ─── Send ──────────────────────────────────────────────
+async function sendMessage() {
+    const input = document.getElementById('msgInput');
+    const text  = input.value.trim();
+    if (!text || !selectedUser || !currentUser) return;
+    input.value = '';
+
+    await addDoc(collection(db, 'messages'), {
+        conversationId: convId(currentUser.uid, selectedUser.uid),
+        senderId:   currentUser.uid,
+        receiverId: selectedUser.uid,
+        text,
+        timestamp:  serverTimestamp()
+    });
+}
+
+document.getElementById('sendBtn').onclick = sendMessage;
+document.getElementById('msgInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMessage();
 });
-
-mainBtn.onclick = async () => {
-    const text = contentInput.value.trim();
-    const file = imageInput.files[0];
-
-    if (!text && !file) return alert("Добавьте текст или изображение!");
-    if (!auth.currentUser) return alert("Вы не авторизованы!");
-    if (file && file.size > 5 * 1024 * 1024) return alert("Файл слишком большой! Максимум 5MB");
-
-    mainBtn.disabled = true;
-    mainBtn.textContent = "Загрузка...";
-
-    try {
-        let imageBase64 = null;
-        if (file) {
-            imageBase64 = await compressImage(file);
-        }
-
-        await addDoc(collection(db, "requests"), {
-            uid: auth.currentUser.uid,
-            name: auth.currentUser.displayName,
-            photo: auth.currentUser.photoURL,
-            text: text || "",
-            image: imageBase64,
-            likes: 0,
-            timestamp: serverTimestamp()
-        });
-
-        contentInput.value = "";
-        imageInput.value = "";
-
-    } catch (e) {
-        console.error("Ошибка публикации:", e);
-        alert("Ошибка: " + e.message);
-    } finally {
-        mainBtn.disabled = false;
-        mainBtn.textContent = "Опубликовать";
-    }
-};
-
-window.processLike = async (id) => {
-    await updateDoc(doc(db, "requests", id), { likes: increment(1) });
-};
-
-// Поиск по авторам
-let liveUnsubscribe = null;
-
-document.getElementById('searchInput').oninput = async (e) => {
-    const term = e.target.value.trim();
-
-    if (!term) {
-        // Возвращаем живую ленту
-        if (liveUnsubscribe) liveUnsubscribe();
-        liveUnsubscribe = onSnapshot(q, snapshot => {
-            feed.innerHTML = "";
-            snapshot.forEach(d => feed.innerHTML += createPostHTML(d));
-        });
-        return;
-    }
-
-    const searchQ = query(
-        collection(db, "requests"),
-        where("name", ">=", term),
-        where("name", "<=", term + "\uf8ff"),
-        limit(20)
-    );
-
-    const snap = await getDocs(searchQ);
-    feed.innerHTML = "";
-    snap.forEach(d => feed.innerHTML += createPostHTML(d));
-};
 </script>
 </body>
 </html>

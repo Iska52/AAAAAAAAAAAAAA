@@ -5,27 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DM</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px;}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px;color:#111827;}
     .card{max-width:520px;margin:0 auto 12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;}
-    .row{display:flex;gap:8px;align-items:center;}
-    button{cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:10px;padding:10px 12px;font-weight:600;}
+    .row{display:flex;gap:10px;align-items:center;}
+    button{cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:10px;padding:10px 12px;font-weight:500;}
     button.primary{background:#2563eb;color:#fff;border-color:#2563eb;}
     button.danger{background:#fee2e2;color:#b91c1c;border-color:#fecaca;}
-    #users button{margin:6px 6px 0 0;}
+
+    .title{font-size:16px;font-weight:600;margin:0;}
+    .muted{color:#6b7280;font-size:13px;}
+
+    /* Users */
+    #users{display:flex;flex-wrap:wrap;gap:10px;}
+    .userBtn{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;}
+    .userBtn:hover{border-color:#cbd5e1;}
+    .avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#e5e7eb;display:block;}
+    .userName{font-size:14px;font-weight:500;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;}
+
+    /* Chat */
     #chat{height:320px;overflow:auto;border:1px solid #e5e7eb;border-radius:10px;padding:10px;background:#fafafa;}
-    .msg{max-width:75%;padding:8px 12px;border-radius:16px;margin:6px 0;white-space:pre-wrap;word-break:break-word;}
+    .msg{max-width:75%;padding:8px 12px;border-radius:16px;margin:6px 0;white-space:pre-wrap;word-break:break-word;font-weight:400;}
     .me{background:#2563eb;color:#fff;margin-left:auto;border-bottom-right-radius:6px;}
     .other{background:#e5e7eb;color:#111827;margin-right:auto;border-bottom-left-radius:6px;}
+
     input{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:14px;}
-    .muted{color:#6b7280;font-size:13px;}
+    .send{width:44px;height:40px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-weight:600;}
+    .send:disabled{border-color:#9ca3af;background:#9ca3af;cursor:not-allowed;}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .meBlock{display:flex;align-items:center;gap:10px;min-width:0;}
+    .meName{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   </style>
 </head>
 <body>
 
   <div id="loginCard" class="card">
-    <div class="row" style="justify-content:space-between;">
+    <div class="topbar">
       <div>
-        <div style="font-weight:800;">DM</div>
+        <div class="title">DM</div>
         <div class="muted">Вход через Google</div>
       </div>
       <button id="loginBtn" class="primary">Войти</button>
@@ -34,26 +51,26 @@
 
   <div id="app" style="display:none;">
     <div class="card">
-      <div class="row" style="justify-content:space-between;">
-        <div>
-          <div id="meName" style="font-weight:800;"></div>
-          <div class="muted" id="meUid"></div>
+      <div class="topbar">
+        <div class="meBlock">
+          <img id="mePhoto" class="avatar" alt="">
+          <div class="meName" id="meName"></div>
         </div>
         <button id="logoutBtn" class="danger">Выйти</button>
       </div>
     </div>
 
     <div class="card">
-      <div style="font-weight:800; margin-bottom:6px;">Собеседники</div>
+      <div class="title" style="margin-bottom:10px;">Собеседники</div>
       <div id="users" class="muted">Загрузка...</div>
     </div>
 
     <div class="card">
-      <div id="chatTitle" style="font-weight:800; margin-bottom:8px;">Выберите собеседника</div>
+      <div id="chatTitle" class="title" style="margin-bottom:10px;">Выберите собеседника</div>
       <div id="chat"></div>
       <div class="row" style="margin-top:10px;">
         <input id="text" placeholder="Сообщение..." disabled />
-        <button id="sendBtn" class="primary" disabled>▶</button>
+        <button id="sendBtn" class="send" disabled>▶</button>
       </div>
       <div class="muted" id="hint" style="margin-top:8px;"></div>
     </div>
@@ -106,6 +123,10 @@
       hintEl.textContent = t || "";
     }
 
+    function avatarUrlFromName(name) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=2563eb&color=fff&bold=true`;
+    }
+
     $("loginBtn").onclick = () => signInWithPopup(auth, provider);
     $("logoutBtn").onclick = () => signOut(auth);
 
@@ -119,9 +140,21 @@
         if (!u?.uid || u.uid === me.uid) return;
         count++;
 
-        const btn = document.createElement("button");
-        btn.textContent = u.name || "Пользователь";
+        const btn = document.createElement("div");
+        btn.className = "userBtn";
         btn.onclick = () => selectPeer(u);
+
+        const img = document.createElement("img");
+        img.className = "avatar";
+        img.alt = "";
+        img.src = u.photo || avatarUrlFromName(u.name);
+
+        const name = document.createElement("div");
+        name.className = "userName";
+        name.textContent = u.name || "Пользователь";
+
+        btn.appendChild(img);
+        btn.appendChild(name);
         usersEl.appendChild(btn);
       });
 
@@ -173,8 +206,6 @@
 
       if (unsubMsgs) unsubMsgs();
 
-      // Слушаем ВСЕ сообщения, где участвует текущий пользователь.
-      // Затем фильтруем по conversationId уже на клиенте (без сложных индексов).
       const q = query(
         collection(db, "messages"),
         where("members", "array-contains", me.uid)
@@ -225,6 +256,7 @@
       peer = null;
       if (unsubMsgs) unsubMsgs();
       unsubMsgs = null;
+
       chatEl.innerHTML = "";
       chatTitle.textContent = "Выберите собеседника";
       textEl.value = "";
@@ -239,19 +271,19 @@
         return;
       }
 
-      // На всякий случай обновим токен, чтобы rules точно видели request.auth
       await user.getIdToken(true);
 
       me = user;
       loginCard.style.display = "none";
       appEl.style.display = "block";
-      $("meName").textContent = user.displayName || "Без имени";
-      $("meUid").textContent = user.uid;
 
-      // Регистрируем пользователя
+      const displayName = user.displayName || "Без имени";
+      $("meName").textContent = displayName;
+      $("mePhoto").src = user.photoURL || avatarUrlFromName(displayName);
+
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
-        name: user.displayName || "Без имени",
+        name: displayName,
         photo: user.photoURL || null,
       }, { merge: true });
 

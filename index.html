@@ -218,13 +218,11 @@
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="authSection" class="login-card">
   <h2>Добро пожаловать</h2>
   <button id="loginBtn">Войти через Google</button>
 </div>
 
-<!-- AUTH BAR -->
 <div id="userInfo" class="auth-bar" style="display:none">
   <img id="userPhoto" class="auth-avatar" alt="" />
   <div class="auth-info">
@@ -235,7 +233,6 @@
 
 <div id="status" class="status" style="display:none"></div>
 
-<!-- MAIN CARD -->
 <div id="dmSection" class="main-card" style="display:none">
   <p class="section-label">Выберите собеседника:</p>
   <div id="userList" class="user-list">
@@ -250,7 +247,6 @@
   </div>
 </div>
 
-<!-- INPUT ROW -->
 <div id="inputRow" class="chat-input-row" style="display:none">
   <input id="msgInput" type="text" placeholder="Ваше сообщение..." disabled />
   <button id="sendBtn" class="send-btn" disabled>&#9658;</button>
@@ -265,7 +261,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 import {
   getAuth, signInWithPopup, GoogleAuthProvider,
-  signOut, onAuthStateChanged
+  signOut, onIdTokenChanged,
+  setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -281,6 +278,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+
+await setPersistence(auth, browserLocalPersistence);
 
 let currentUser = null;
 let selectedUser = null;
@@ -324,11 +323,10 @@ function avatarUrl(name, bg = '3b82f6') {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=fff&bold=true`;
 }
 
-// Auth actions
 el.loginBtn.onclick = () => signInWithPopup(auth, provider);
 el.logoutBtn.onclick = () => signOut(auth);
 
-onAuthStateChanged(auth, async user => {
+onIdTokenChanged(auth, async (user) => {
   setStatus('');
 
   if (!user) {
@@ -351,6 +349,8 @@ onAuthStateChanged(auth, async user => {
     return;
   }
 
+  await user.getIdToken(true);
+
   currentUser = user;
   el.authSection.style.display = 'none';
   el.userInfo.style.display = 'flex';
@@ -360,7 +360,6 @@ onAuthStateChanged(auth, async user => {
   el.userName.textContent = user.displayName || 'Без имени';
   el.userPhoto.src = user.photoURL || avatarUrl(user.displayName || 'User', '3b82f6');
 
-  // Save/update user profile (users/{uid})
   await setDoc(doc(db, 'users', user.uid), {
     uid: user.uid,
     name: user.displayName || 'Без имени',
@@ -402,12 +401,10 @@ async function loadUsers() {
       el.userList.appendChild(div);
     });
 
-    if (!count) {
-      el.userList.innerHTML = '<p class="hint">Нет других пользователей</p>';
-    }
+    if (!count) el.userList.innerHTML = '<p class="hint">Нет других пользователей</p>';
   } catch (e) {
     console.error(e);
-    setStatus('Не удалось загрузить список пользователей: ' + (e?.message || e), 'error');
+    setStatus('Ошибка users: ' + (e?.message || e), 'error');
     el.userList.innerHTML = '<p class="hint">Ошибка загрузки</p>';
   }
 }
@@ -434,9 +431,11 @@ function openChat() {
   setStatus('');
 
   const cid = convId(currentUser.uid, selectedUser.uid);
+
   const q = query(
     collection(db, 'messages'),
     where('conversationId', '==', cid),
+    where('members', 'array-contains', currentUser.uid),
     orderBy('timestamp', 'asc'),
     limit(200)
   );
@@ -445,7 +444,6 @@ function openChat() {
     q,
     (snap) => {
       el.chatBox.innerHTML = '';
-
       if (snap.empty) {
         el.chatBox.innerHTML = '<p class="hint">Сообщений пока нет</p>';
         return;
@@ -464,11 +462,7 @@ function openChat() {
     (err) => {
       console.error(err);
       el.chatBox.innerHTML = '<p class="hint">Ошибка доступа к чату</p>';
-      if (err?.code === 'permission-denied') {
-        setStatus('permission-denied: проверь Firestore Rules (messages). Если есть старые "битые" документы в messages — удали их.', 'error');
-      } else {
-        setStatus('Ошибка чата: ' + (err?.message || err), 'error');
-      }
+      setStatus((err?.code || 'error') + ': ' + (err?.message || err), 'error');
     }
   );
 }
@@ -483,10 +477,12 @@ async function sendMessage() {
   try {
     const senderId = currentUser.uid;
     const receiverId = selectedUser.uid;
-    const conversationId = convId(senderId, receiverId);
+    const members = [senderId, receiverId].sort();
+    const conversationId = members.join('_');
 
     await addDoc(collection(db, 'messages'), {
       conversationId,
+      members,
       senderId,
       receiverId,
       text,
@@ -497,11 +493,7 @@ async function sendMessage() {
     el.msgInput.focus();
   } catch (e) {
     console.error(e);
-    if (e?.code === 'permission-denied') {
-      alert('Не отправлено: permission-denied. Проверь Firestore Rules для messages.');
-    } else {
-      alert('Ошибка отправки: ' + (e?.message || e));
-    }
+    alert('Ошибка отправки: ' + (e?.message || e));
   } finally {
     el.sendBtn.disabled = false;
   }

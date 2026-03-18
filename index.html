@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Мониторинг Группы</title>
+  <title>Мониторинг Группы1</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -114,7 +114,6 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    // Данные из твоего скриншота
     const URL = 'https://ugracdwltsflfwieakty.supabase.co';
     const KEY = 'sb_publishable_zXJ6w0FH5iq2DUTk2kv7BQ_2rpI4LIq';
     const supabase = createClient(URL, KEY);
@@ -145,19 +144,19 @@
 
         if (error) return console.error(error);
 
-        // Отрисовка списка в блок #users
+        // Отрисовка списка
         const list = document.getElementById('users');
         list.innerHTML = data.map(user => `
             <div class="user-item">
                 <div class="status-dot" style="background: ${user.color || '#ccc'}"></div>
-                <div style="flex-grow: 1;">
-                    <strong>${user.username}</strong><br>
-                    <small style="color: #666;">${user.status || 'Статус не задан'}</small>
+                <div class="user-info">
+                    <strong>${user.username}</strong>
+                    <div>${user.status || 'Статус не задан'}</div>
                 </div>
             </div>
         `).join('');
 
-        // Отображение текущего пользователя в #myInfo
+        // Отображение текущего пользователя
         const me = data.find(u => u.id === MY_ID);
         if (me) {
             document.getElementById('myInfo').innerText = `Вы зашли как: ${me.username}`;

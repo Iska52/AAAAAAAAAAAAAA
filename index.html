@@ -3,57 +3,111 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DM</title>
+  <title>Мониторинг Группы</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f3f4f6;margin:0;padding:16px;color:#111827;}
-    .card{max-width:520px;margin:0 auto 12px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;}
-    .row{display:flex;gap:10px;align-items:center;}
-    button{cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:10px;padding:10px 12px;font-weight:500;}
-    button.primary{background:#2563eb;color:#fff;border-color:#2563eb;}
-    button.danger{background:#fee2e2;color:#b91c1c;border-color:#fecaca;}
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
 
-    .title{font-size:16px;font-weight:600;margin:0;}
-    .muted{color:#6b7280;font-size:13px;}
+    .card {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
 
-    /* Users */
-    #users{display:flex;flex-wrap:wrap;gap:10px;}
-    .user-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer; width: 100%;}
-    .user-item:hover{border-color:#cbd5e1;}
-    .status-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
-    
-    /* Chat */
-    #chat{height:320px;overflow:auto;border:1px solid #e5e7eb;border-radius:10px;padding:10px;background:#fafafa;}
-    input{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:14px;}
-    .send{width:44px;height:40px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-weight:600;}
+    h2 {
+      margin: 0 0 16px 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
 
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-    .meBlock{display:flex;align-items:center;gap:10px;min-width:0;}
+    .me-text {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    /* Сетка кнопок 2х2 */
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .status-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+
+    .status-btn:hover { opacity: 0.9; }
+
+    /* Цвета кнопок со скрина */
+    .btn-study { background-color: #28a745; }
+    .btn-coffee { background-color: #ffc107; color: #000; border: 1px solid #000; }
+    .btn-game { background-color: #17a2b8; }
+    .btn-home { background-color: #6c757d; }
+
+    /* Список группы */
+    .user-list {
+      margin-top: 10px;
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .user-info strong { font-size: 16px; }
+    .user-info div { font-size: 13px; color: #777; }
   </style>
 </head>
 <body>
 
-  <div id="app">
-    <div class="card">
-      <div class="topbar">
-        <div class="meBlock">
-          <div id="myInfo" class="title">Загрузка профиля...</div>
-        </div>
-        <button onclick="changeStatus('Работаю', '#10b981')" class="primary">Статус: Работаю</button>
-      </div>
+  <div class="card">
+    <h2>Мой профиль</h2>
+    <div id="myInfo" class="me-text">Загрузка...</div>
+    
+    <div class="status-grid">
+      <button class="status-btn btn-study" onclick="changeStatus('📚 Учусь', '#28a745')">📚 Учусь</button>
+      <button class="status-btn btn-coffee" onclick="changeStatus('☕ Кофе', '#ffc107')">☕ Кофе</button>
+      <button class="status-btn btn-game" onclick="changeStatus('🎮 В игре', '#17a2b8')">🎮 В игре</button>
+      <button class="status-btn btn-home" onclick="changeStatus('🏠 Дома', '#6c757d')">🏠 Дома</button>
     </div>
+  </div>
 
-    <div class="card">
-      <div class="title" style="margin-bottom:10px;">Собеседники</div>
-      <div id="users" class="muted">Загрузка списка...</div>
-    </div>
-
-    <div class="card">
-      <div id="chatTitle" class="title" style="margin-bottom:10px;">Общий чат</div>
-      <div id="chat"></div>
-      <div class="row" style="margin-top:10px;">
-        <input id="text" placeholder="Сообщение..." />
-        <button id="sendBtn" class="send">▶</button>
-      </div>
+  <div class="card">
+    <h2>Монитор группы</h2>
+    <div id="users" class="user-list">
+      <div class="muted">Загрузка списка...</div>
     </div>
   </div>
 

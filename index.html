@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Мониторинг Группы1</title>
+  <title>Мониторинг Группы 2</title>
   <style>
     :root {
       --bg: #f3f5f7;
@@ -258,11 +258,10 @@
     }
 
     async function signOut() {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error(error);
-        alert('Ошибка при выходе');
-        return;
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch (e) {
+        console.error('signOut error:', e);
       }
 
       await refreshAuthState();

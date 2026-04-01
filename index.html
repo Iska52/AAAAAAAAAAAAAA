@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Мониторинг группы</title>
+  <title>Мониторинг группы 2</title>
   <style>
     :root{
       --bg:#ececec;
@@ -571,7 +571,6 @@
       if (!existing) {
         const payload = {
           id: user.id,
-          email: user.email ?? null,
           username,
           status: '📚 Учусь',
           color: '#28a745',
@@ -587,7 +586,6 @@
       } else {
         const payload = {
           username: existing.username || username,
-          email: user.email ?? null,
           last_seen: new Date().toISOString()
         };
 

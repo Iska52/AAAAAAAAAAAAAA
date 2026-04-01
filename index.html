@@ -13,7 +13,6 @@
       --border: #e5e7eb;
       --primary: #01696f;
       --primary-hover: #0c4e54;
-      --danger: #b42318;
       --shadow: 0 8px 24px rgba(0,0,0,.08);
       --radius: 16px;
     }
@@ -42,11 +41,7 @@
       box-shadow: var(--shadow);
     }
 
-    h2 {
-      margin: 0 0 16px;
-      font-size: 22px;
-      font-weight: 700;
-    }
+    h2 { margin: 0 0 16px; font-size: 22px; font-weight: 700; }
 
     .me-text, .auth-text {
       font-size: 15px;
@@ -55,17 +50,9 @@
       line-height: 1.5;
     }
 
-    .muted {
-      color: var(--muted);
-      font-size: 14px;
-    }
+    .muted { color: var(--muted); font-size: 14px; }
 
-    .auth-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
+    .auth-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 
     .btn {
       min-height: 44px;
@@ -77,35 +64,11 @@
       cursor: pointer;
       transition: .2s ease;
     }
-
     .btn:hover { opacity: .95; }
+    .btn-google { background: #fff; color: #111827; border: 1px solid #d1d5db; }
+    .btn-logout { background: #111827; color: white; }
 
-    .btn-google {
-      background: #ffffff;
-      color: #111827;
-      border: 1px solid #d1d5db;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-logout {
-      background: #111827;
-      color: white;
-    }
-
-    .status-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 8px;
-    }
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
 
     .status-btn {
       min-height: 48px;
@@ -118,21 +81,14 @@
       font-size: 14px;
       transition: .2s ease;
     }
-
     .status-btn:hover { opacity: .92; }
-    .status-btn:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
+    .status-btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn-study { background-color: #28a745; }
     .btn-coffee { background-color: #ffc107; color: #111; border: 1px solid #222; }
     .btn-game { background-color: #17a2b8; }
     .btn-home { background-color: #6c757d; }
 
-    .user-list {
-      margin-top: 8px;
-    }
+    .user-list { margin-top: 8px; }
 
     .user-item {
       display: flex;
@@ -141,10 +97,7 @@
       padding: 12px 0;
       border-bottom: 1px solid #f0f0f0;
     }
-
-    .user-item:last-child {
-      border-bottom: none;
-    }
+    .user-item:last-child { border-bottom: none; }
 
     .status-dot {
       width: 12px;
@@ -153,27 +106,76 @@
       flex: 0 0 12px;
     }
 
-    .user-info strong {
-      display: block;
-      font-size: 16px;
-      margin-bottom: 2px;
+    .user-info strong { display: block; font-size: 16px; margin-bottom: 2px; }
+    .user-info .status-text { font-size: 13px; color: #6b7280; }
+
+    /* ── Study timer ── */
+    .study-timer {
+      font-size: 12px;
+      color: #15803d;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      margin-top: 3px;
     }
 
-    .user-info div {
+    /* ── Online / Offline pill ── */
+    .user-item-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+    .online-pill, .offline-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .online-pill { background: #dcfce7; color: #15803d; }
+    .offline-pill { background: #f3f4f6; color: #9ca3af; }
+
+    .online-pill::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: blink 1.5s infinite;
+    }
+    .offline-pill::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #d1d5db;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .25; }
+    }
+
+    /* ── Online summary bar ── */
+    .online-summary {
+      display: flex;
+      align-items: center;
+      gap: 7px;
       font-size: 13px;
-      color: #6b7280;
+      font-weight: 600;
+      color: #15803d;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 8px 14px;
+      margin-bottom: 12px;
+    }
+    .online-summary-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: blink 1.5s infinite;
     }
 
-    .notice {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #6b7280;
-      line-height: 1.5;
-    }
-
-    .hidden {
-      display: none !important;
-    }
+    .notice { margin-top: 12px; font-size: 13px; color: #6b7280; line-height: 1.5; }
+    .hidden { display: none !important; }
 
     @media (max-width: 480px) {
       body { padding: 14px; }
@@ -186,31 +188,30 @@
   <div class="card">
     <h2>Авторизация</h2>
     <div id="authInfo" class="auth-text">Проверка сессии...</div>
-
     <div class="auth-actions">
       <button id="googleBtn" class="btn btn-google" type="button">Войти через Google</button>
       <button id="logoutBtn" class="btn btn-logout hidden" type="button">Выйти</button>
     </div>
-
-    <div class="notice">
-      Первый вход через Google автоматически создаст профиль в таблице profiles.
-    </div>
+    <div class="notice">Первый вход через Google автоматически создаст профиль в таблице profiles.</div>
   </div>
 
   <div class="card">
     <h2>Мой профиль</h2>
     <div id="myInfo" class="me-text">Загрузка...</div>
-
     <div class="status-grid">
-      <button class="status-btn btn-study" onclick="changeStatus('📚 Учусь', '#28a745')">📚 Учусь</button>
-      <button class="status-btn btn-coffee" onclick="changeStatus('☕ Кофе', '#ffc107')">☕ Кофе</button>
-      <button class="status-btn btn-game" onclick="changeStatus('🎮 В игре', '#17a2b8')">🎮 В игре</button>
-      <button class="status-btn btn-home" onclick="changeStatus('🏠 Дома', '#6c757d')">🏠 Дома</button>
+      <button class="status-btn btn-study"  onclick="changeStatus('📚 Учусь',  '#28a745')">📚 Учусь</button>
+      <button class="status-btn btn-coffee" onclick="changeStatus('☕ Кофе',   '#ffc107')">☕ Кофе</button>
+      <button class="status-btn btn-game"   onclick="changeStatus('🎮 В игре', '#17a2b8')">🎮 В игре</button>
+      <button class="status-btn btn-home"   onclick="changeStatus('🏠 Дома',   '#6c757d')">🏠 Дома</button>
     </div>
   </div>
 
   <div class="card">
     <h2>Монитор группы</h2>
+    <div id="onlineSummary" class="online-summary hidden">
+      <div class="online-summary-dot"></div>
+      <span id="onlineSummaryText"></span>
+    </div>
     <div id="users" class="user-list">
       <div class="muted">Загрузка списка...</div>
     </div>
@@ -219,100 +220,158 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    const SUPABASE_URL = 'https://ugracdwltsflfwieakty.supabase.co';
+    const SUPABASE_URL     = 'https://ugracdwltsflfwieakty.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_zXJ6w0FH5iq2DUTk2kv7BQ_2rpI4LIq';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const authInfo = document.getElementById('authInfo');
-    const myInfo = document.getElementById('myInfo');
-    const usersEl = document.getElementById('users');
-    const googleBtn = document.getElementById('googleBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const statusButtons = Array.from(document.querySelectorAll('.status-btn'));
+    // Пользователь считается онлайн, если last_seen обновлялся < 60 секунд назад
+    const ONLINE_MS = 60_000;
 
-    function setStatusButtonsDisabled(disabled) {
-      statusButtons.forEach(btn => btn.disabled = disabled);
+    const authInfo       = document.getElementById('authInfo');
+    const myInfo         = document.getElementById('myInfo');
+    const usersEl        = document.getElementById('users');
+    const onlineSummary  = document.getElementById('onlineSummary');
+    const onlineSummaryText = document.getElementById('onlineSummaryText');
+    const googleBtn      = document.getElementById('googleBtn');
+    const logoutBtn      = document.getElementById('logoutBtn');
+    const statusButtons  = Array.from(document.querySelectorAll('.status-btn'));
+
+    function setStatusButtonsDisabled(d) { statusButtons.forEach(b => b.disabled = d); }
+
+    function escapeHtml(v = '') {
+      return String(v)
+        .replaceAll('&','&amp;').replaceAll('<','&lt;')
+        .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
     }
 
-    function escapeHtml(value = '') {
-      return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+    // ── Онлайн-проверка ──────────────────────────────────────────────
+    function isOnline(lastSeen) {
+      if (!lastSeen) return false;
+      return Date.now() - new Date(lastSeen).getTime() < ONLINE_MS;
     }
 
+    // ── Форматирование времени учёбы ─────────────────────────────────
+    function formatElapsed(iso) {
+      if (!iso) return '';
+      const diff = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      return `${h}ч ${String(m).padStart(2,'0')}м ${String(s).padStart(2,'0')}с`;
+    }
+
+    // ── Рендер списка (вызывается и при fetch, и каждую секунду) ─────
+    let cachedUsers = [];
+
+    function renderUsers(data) {
+      const onlineCount = data.filter(u => isOnline(u.last_seen)).length;
+
+      if (onlineCount > 0) {
+        onlineSummaryText.textContent = `Онлайн сейчас: ${onlineCount} из ${data.length}`;
+        onlineSummary.classList.remove('hidden');
+      } else {
+        onlineSummary.classList.add('hidden');
+      }
+
+      usersEl.innerHTML = data.map(user => {
+        const online     = isOnline(user.last_seen);
+        const isStudying = user.status === '📚 Учусь';
+
+        // Показываем таймер только онлайн-ученикам
+        const timerHtml = (isStudying && online && user.status_changed_at)
+          ? `<div class="study-timer" data-start="${escapeHtml(user.status_changed_at)}">
+               ⏱ ${formatElapsed(user.status_changed_at)}
+             </div>`
+          : '';
+
+        return `
+          <div class="user-item">
+            <div class="status-dot" style="background:${escapeHtml(user.color || '#cbd5e1')}"></div>
+            <div class="user-info">
+              <strong>${escapeHtml(user.username || 'Без имени')}</strong>
+              <div class="status-text">${escapeHtml(user.status || 'Статус не задан')}</div>
+              ${timerHtml}
+            </div>
+            <div class="user-item-right">
+              ${online
+                ? `<span class="online-pill">Онлайн</span>`
+                : `<span class="offline-pill">Офлайн</span>`}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── Тик таймеров каждую секунду (без запросов к БД) ─────────────
+    function tickTimers() {
+      document.querySelectorAll('.study-timer[data-start]').forEach(el => {
+        el.textContent = '⏱ ' + formatElapsed(el.dataset.start);
+      });
+    }
+
+    // ── Heartbeat — обновляет last_seen каждые 30 секунд ─────────────
+    async function heartbeat() {
+      const user = await getCurrentUser();
+      if (!user) return;
+      await supabase.from('profiles')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', user.id);
+    }
+
+    // ── Auth helpers ─────────────────────────────────────────────────
     async function signInWithGoogle() {
-      const redirectTo = window.location.origin + window.location.pathname;
-
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo }
+        options: { redirectTo: window.location.origin + window.location.pathname }
       });
-
-      if (error) {
-        console.error(error);
-        alert('Ошибка входа через Google');
-      }
+      if (error) { console.error(error); alert('Ошибка входа через Google'); }
     }
 
     async function signOut() {
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-      } catch (e) {
-        console.error('signOut error:', e);
-      }
-
+      try { await supabase.auth.signOut({ scope: 'local' }); } catch(e) { console.error(e); }
       await refreshAuthState();
       await fetchGroup();
     }
 
     async function getCurrentUser() {
       const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error('getUser error:', error);
-        return null;
-      }
+      if (error) { console.error(error); return null; }
       return data.user ?? null;
     }
 
     function buildUsername(user) {
-      const fullName = user?.user_metadata?.full_name?.trim();
-      const email = user?.email?.trim();
-      const emailName = email ? email.split('@')[0] : null;
-
-      return fullName || emailName || 'Пользователь';
+      return user?.user_metadata?.full_name?.trim()
+        || user?.email?.split('@')[0]
+        || 'Пользователь';
     }
 
+    // ── Создаём профиль только при первом входе ──────────────────────
     async function ensureProfile(user) {
-      const username = buildUsername(user);
-      const defaultStatus = 'Онлайн';
-      const defaultColor = '#01696f';
+      const { data: existing } = await supabase
+        .from('profiles').select('id').eq('id', user.id).single();
 
-      const profilePayload = {
-        id: user.id,
-        email: user.email ?? null,
-        username,
-        status: defaultStatus,
-        color: defaultColor
-      };
-
-      const { error } = await supabase
-        .from('profiles')
-        .upsert(profilePayload, { onConflict: 'id' });
-
-      if (error) {
-        console.error('ensureProfile error:', error);
+      if (!existing) {
+        await supabase.from('profiles').insert({
+          id: user.id,
+          email: user.email ?? null,
+          username: buildUsername(user),
+          status: 'Онлайн',
+          color: '#01696f',
+          status_changed_at: new Date().toISOString(),
+          last_seen: new Date().toISOString()
+        });
+      } else {
+        // Просто обновляем last_seen при каждом входе
+        await supabase.from('profiles')
+          .update({ last_seen: new Date().toISOString() })
+          .eq('id', user.id);
       }
     }
 
     async function refreshAuthState() {
       const user = await getCurrentUser();
-
       if (!user) {
         authInfo.textContent = 'Вы не авторизованы.';
-        myInfo.textContent = 'Сначала войдите через Google.';
+        myInfo.textContent   = 'Сначала войдите через Google.';
         googleBtn.classList.remove('hidden');
         logoutBtn.classList.add('hidden');
         setStatusButtonsDisabled(true);
@@ -320,76 +379,60 @@
       }
 
       await ensureProfile(user);
-
-      const displayName = buildUsername(user);
-      authInfo.textContent = `Вы вошли как: ${displayName}${user.email ? ' (' + user.email + ')' : ''}`;
+      authInfo.textContent = `Вы вошли как: ${buildUsername(user)} (${user.email})`;
       googleBtn.classList.add('hidden');
       logoutBtn.classList.remove('hidden');
       setStatusButtonsDisabled(false);
-
       return user;
     }
 
+    // ── Загрузка группы ───────────────────────────────────────────────
     async function fetchGroup() {
       const currentUser = await getCurrentUser();
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, username, email, status, color')
+        .select('id, username, email, status, color, last_seen, status_changed_at')
         .order('username', { ascending: true });
 
       if (error) {
         console.error('fetchGroup error:', error);
-        usersEl.innerHTML = `<div class="muted">Не удалось загрузить список. Проверь таблицу profiles и RLS.</div>`;
+        usersEl.innerHTML = `<div class="muted">Не удалось загрузить список. Проверь RLS.</div>`;
         return;
       }
 
-      if (!data || data.length === 0) {
+      if (!data?.length) {
         usersEl.innerHTML = `<div class="muted">Пока нет участников.</div>`;
-        myInfo.textContent = currentUser
-          ? 'Ваш профиль создан, но список пока пуст.'
-          : 'Сначала войдите через Google.';
         return;
       }
 
-      usersEl.innerHTML = data.map(user => `
-        <div class="user-item">
-          <div class="status-dot" style="background:${escapeHtml(user.color || '#cbd5e1')}"></div>
-          <div class="user-info">
-            <strong>${escapeHtml(user.username || 'Без имени')}</strong>
-            <div>${escapeHtml(user.status || 'Статус не задан')}</div>
-          </div>
-        </div>
-      `).join('');
+      cachedUsers = data;
+      renderUsers(data);
 
       if (currentUser) {
         const me = data.find(u => u.id === currentUser.id);
-        if (me) {
-          myInfo.textContent = `Вы зашли как: ${me.username}${me.status ? ' • статус: ' + me.status : ''}`;
-        } else {
-          myInfo.textContent = `Вы вошли, но профиль еще не найден в profiles.`;
-        }
+        myInfo.textContent = me
+          ? `Вы зашли как: ${me.username} • статус: ${me.status}`
+          : 'Вы вошли, но профиль ещё не найден.';
       } else {
         myInfo.textContent = 'Сначала войдите через Google.';
       }
     }
 
+    // ── Смена статуса — сбрасывает status_changed_at ─────────────────
     window.changeStatus = async (text, color) => {
       const user = await getCurrentUser();
+      if (!user) { alert('Сначала войдите через Google'); return; }
 
-      if (!user) {
-        alert('Сначала войдите через Google');
-        return;
-      }
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ status: text, color })
-        .eq('id', user.id);
+      const { error } = await supabase.from('profiles').update({
+        status: text,
+        color,
+        status_changed_at: new Date().toISOString()   // сброс таймера
+      }).eq('id', user.id);
 
       if (error) {
-        console.error('changeStatus error:', error);
-        alert('Ошибка обновления статуса. Проверь RLS policies в Supabase.');
+        console.error(error);
+        alert('Ошибка обновления статуса. Проверь RLS policies.');
         return;
       }
 
@@ -407,7 +450,9 @@
     async function init() {
       await refreshAuthState();
       await fetchGroup();
-      setInterval(fetchGroup, 5000);
+      setInterval(fetchGroup,  5_000);   // обновление данных каждые 5 сек
+      setInterval(heartbeat,  30_000);   // пинг last_seen каждые 30 сек
+      setInterval(tickTimers,  1_000);   // плавный тик таймеров без запросов
     }
 
     init();

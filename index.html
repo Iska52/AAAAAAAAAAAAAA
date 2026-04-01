@@ -3,339 +3,330 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Мониторинг Группы 3</title>
+  <title>Мониторинг группы</title>
   <style>
-    :root {
-      --bg: #f3f5f7;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --primary: #01696f;
-      --primary-hover: #0c4e54;
-      --shadow: 0 8px 24px rgba(0,0,0,.08);
-      --radius: 16px;
+    :root{
+      --bg:#ececec;
+      --card:#f3f3f3;
+      --border:#e4e4e4;
+      --text:#1d1d1f;
+      --muted:#7f8b97;
+      --blue:#3b82f6;
+      --danger:#e33445;
+      --warning:#f5bf08;
+      --secondary:#808b97;
+      --green:#22c55e;
+      --graydot:#cfcfcf;
+      --shadow:0 10px 25px rgba(0,0,0,.05);
+      --radius:20px;
     }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      align-items: center;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:#e9e9ea;
+      font-family:system-ui,-apple-system,sans-serif;
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      padding:8px;
     }
 
-    .card {
-      width: 100%;
-      max-width: 560px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
+    .phone{
+      width:100%;
+      max-width:430px;
+      background:#efefef;
+      min-height:100vh;
+      border:1px solid #d4d4d4;
+      padding:14px 12px 24px;
     }
 
-    h2 { margin: 0 0 16px; font-size: 22px; font-weight: 700; }
-
-    .me-text, .auth-text {
-      font-size: 15px;
-      color: #374151;
-      margin-bottom: 16px;
-      line-height: 1.5;
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:18px;
     }
 
-    .muted { color: var(--muted); font-size: 14px; }
-
-    .auth-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
-
-    .btn {
-      min-height: 44px;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: .2s ease;
-    }
-    .btn:hover { opacity: .95; }
-    .btn-google { background: #fff; color: #111827; border: 1px solid #d1d5db; }
-    .btn-logout { background: #111827; color: white; }
-
-    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
-
-    .status-btn {
-      min-height: 48px;
-      border: none;
-      border-radius: 10px;
-      padding: 12px;
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 14px;
-      transition: .2s ease;
-    }
-    .status-btn:hover { opacity: .92; }
-    .status-btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-study { background-color: #28a745; }
-    .btn-coffee { background-color: #ffc107; color: #111; border: 1px solid #222; }
-    .btn-game { background-color: #17a2b8; }
-    .btn-home { background-color: #6c757d; }
-
-    .user-list { margin-top: 8px; }
-
-    .user-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .user-item:last-child { border-bottom: none; }
-
-    .status-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      flex: 0 0 12px;
+    .main-name{
+      text-align:center;
+      font-size:18px;
+      font-weight:800;
+      line-height:1.25;
+      margin-top:12px;
+      margin-bottom:18px;
     }
 
-    .user-info strong { display: block; font-size: 16px; margin-bottom: 2px; }
-    .user-info .status-text { font-size: 13px; color: #6b7280; }
-
-    /* ── Study timer ── */
-    .study-timer {
-      font-size: 12px;
-      color: #15803d;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      margin-top: 3px;
+    .big-timer{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      color:var(--blue);
+      font-size:24px;
+      font-weight:900;
+      margin-bottom:18px;
     }
 
-    /* ── Online / Offline pill ── */
-    .user-item-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-
-    .online-pill, .offline-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 99px;
-      white-space: nowrap;
-    }
-    .online-pill { background: #dcfce7; color: #15803d; }
-    .offline-pill { background: #f3f4f6; color: #9ca3af; }
-
-    .online-pill::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #22c55e;
-      animation: blink 1.5s infinite;
-    }
-    .offline-pill::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #d1d5db;
+    .big-timer .icon{
+      font-size:28px;
+      line-height:1;
     }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .25; }
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:11px;
+      min-height:40px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.18s ease;
     }
 
-    /* ── Online summary bar ── */
-    .online-summary {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #15803d;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 10px;
-      padding: 8px 14px;
-      margin-bottom: 12px;
-    }
-    .online-summary-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #22c55e;
-      animation: blink 1.5s infinite;
+    .btn:active{transform:translateY(1px)}
+    .btn-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:8px;
     }
 
-    .notice { margin-top: 12px; font-size: 13px; color: #6b7280; line-height: 1.5; }
-    .hidden { display: none !important; }
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-warning{background:var(--warning);color:#222}
+    .btn-secondary{background:var(--secondary);color:#fff}
 
-    @media (max-width: 480px) {
-      body { padding: 14px; }
-      .card { padding: 18px; }
+    .section-title{
+      text-align:center;
+      font-weight:900;
+      font-size:15px;
+      margin-bottom:14px;
+    }
+
+    .group-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .user-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:8px 0;
+      border-bottom:1px solid #e7e7e7;
+    }
+
+    .user-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      flex:0 0 10px;
+      background:var(--graydot);
+    }
+
+    .dot.online{
+      background:var(--green);
+      box-shadow:0 0 0 4px rgba(34,197,94,.15);
+    }
+
+    .user-name{
+      font-size:15px;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:150px;
+    }
+
+    .user-right{
+      text-align:right;
+      margin-left:auto;
+    }
+
+    .user-status{
+      font-size:13px;
+      color:#7b6b64;
+      line-height:1.2;
+      white-space:nowrap;
+    }
+
+    .user-online{
+      font-size:11px;
+      line-height:1.2;
+      margin-top:2px;
+      color:var(--muted);
+    }
+
+    .user-online.is-online{
+      color:var(--green);
+      font-weight:700;
+    }
+
+    .user-study-time{
+      font-size:12px;
+      color:#6da9ff;
+      margin-top:2px;
+      white-space:nowrap;
+    }
+
+    .chat-box{
+      height:160px;
+      overflow:auto;
+      background:#f1f1f1;
+      border:1px solid #e0e0e0;
+      border-radius:10px;
+      padding:12px;
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .chat-line{margin-bottom:8px; word-break:break-word}
+    .chat-line strong{font-weight:900}
+
+    .chat-form{
+      display:grid;
+      grid-template-columns:1fr 52px;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .chat-input{
+      width:100%;
+      height:38px;
+      border:1px solid #d8d8d8;
+      border-radius:10px;
+      padding:0 12px;
+      outline:none;
+      background:#f8f8f8;
+    }
+
+    .chat-input:focus{
+      border-color:#91c4ff;
+      box-shadow:0 0 0 3px rgba(59,130,246,.12);
+    }
+
+    .send-btn{
+      border:none;
+      border-radius:10px;
+      background:#43d18e;
+      color:#fff;
+      font-size:20px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
     }
   </style>
 </head>
 <body>
+  <div class="phone">
+    <div class="card">
+      <div id="mainName" class="main-name">Загрузка...</div>
+      <div id="bigTimer" class="big-timer">
+        <span class="icon">⏱️</span>
+        <span id="bigTimerText">0 сек.</span>
+      </div>
 
-  <div class="card">
-    <h2>Авторизация</h2>
-    <div id="authInfo" class="auth-text">Проверка сессии...</div>
-    <div class="auth-actions">
-      <button id="googleBtn" class="btn btn-google" type="button">Войти через Google</button>
-      <button id="logoutBtn" class="btn btn-logout hidden" type="button">Выйти</button>
-    </div>
-    <div class="notice">Первый вход через Google автоматически создаст профиль в таблице profiles.</div>
-  </div>
+      <button id="endSessionBtn" class="btn btn-danger">⛔ Завершить сессию</button>
 
-  <div class="card">
-    <h2>Мой профиль</h2>
-    <div id="myInfo" class="me-text">Загрузка...</div>
-    <div class="status-grid">
-      <button class="status-btn btn-study"  onclick="changeStatus('📚 Учусь',  '#28a745')">📚 Учусь</button>
-      <button class="status-btn btn-coffee" onclick="changeStatus('☕ Кофе',   '#ffc107')">☕ Кофе</button>
-      <button class="status-btn btn-game"   onclick="changeStatus('🎮 В игре', '#17a2b8')">🎮 В игре</button>
-      <button class="status-btn btn-home"   onclick="changeStatus('🏠 Дома',   '#6c757d')">🏠 Дома</button>
+      <div class="btn-row">
+        <button id="breakBtn" class="btn btn-warning">☕ Перерыв</button>
+        <button id="logoutBtn" class="btn btn-secondary">Выход</button>
+      </div>
     </div>
-  </div>
 
-  <div class="card">
-    <h2>Монитор группы</h2>
-    <div id="onlineSummary" class="online-summary hidden">
-      <div class="online-summary-dot"></div>
-      <span id="onlineSummaryText"></span>
+    <div class="card">
+      <div class="section-title">🎥 Монитор группы</div>
+      <div id="usersList" class="group-list">
+        <div class="muted">Загрузка списка...</div>
+      </div>
     </div>
-    <div id="users" class="user-list">
-      <div class="muted">Загрузка списка...</div>
+
+    <div class="card">
+      <div class="section-title">💬 Общий чат</div>
+      <div id="chatBox" class="chat-box"></div>
+
+      <form id="chatForm" class="chat-form">
+        <input id="chatInput" class="chat-input" placeholder="Сообщение..." maxlength="500" />
+        <button class="send-btn" type="submit">➤</button>
+      </form>
     </div>
   </div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    const SUPABASE_URL     = 'https://ugracdwltsflfwieakty.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_zXJ6w0FH5iq2DUTk2kv7BQ_2rpI4LIq';
+    const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Пользователь считается онлайн, если last_seen обновлялся < 60 секунд назад
-    const ONLINE_MS = 60_000;
+    const ONLINE_WINDOW_MS = 45000;
+    const HEARTBEAT_MS = 20000;
+    const POLL_MS = 5000;
+    const CHAT_LIMIT = 100;
 
-    const authInfo       = document.getElementById('authInfo');
-    const myInfo         = document.getElementById('myInfo');
-    const usersEl        = document.getElementById('users');
-    const onlineSummary  = document.getElementById('onlineSummary');
-    const onlineSummaryText = document.getElementById('onlineSummaryText');
-    const googleBtn      = document.getElementById('googleBtn');
-    const logoutBtn      = document.getElementById('logoutBtn');
-    const statusButtons  = Array.from(document.querySelectorAll('.status-btn'));
+    const mainNameEl = document.getElementById('mainName');
+    const bigTimerTextEl = document.getElementById('bigTimerText');
+    const usersListEl = document.getElementById('usersList');
+    const chatBoxEl = document.getElementById('chatBox');
+    const chatFormEl = document.getElementById('chatForm');
+    const chatInputEl = document.getElementById('chatInput');
+    const breakBtnEl = document.getElementById('breakBtn');
+    const logoutBtnEl = document.getElementById('logoutBtn');
+    const endSessionBtnEl = document.getElementById('endSessionBtn');
 
-    function setStatusButtonsDisabled(d) { statusButtons.forEach(b => b.disabled = d); }
+    let me = null;
+    let myProfile = null;
+    let groupUsers = [];
+    let chatMessages = [];
 
-    function escapeHtml(v = '') {
-      return String(v)
-        .replaceAll('&','&amp;').replaceAll('<','&lt;')
-        .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+    function escapeHtml(value = '') {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
     }
 
-    // ── Онлайн-проверка ──────────────────────────────────────────────
+    function formatShortDuration(iso) {
+      if (!iso) return '0 сек.';
+      const sec = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+      if (sec < 60) return `${sec} сек.`;
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      if (h > 0) return `${h}ч ${m}м ${s}с`;
+      return `${m}м ${s}с`;
+    }
+
+    function formatStudySmall(iso) {
+      if (!iso) return '0ч 0м 0с';
+      const sec = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      return `${h}ч ${m}м ${s}с`;
+    }
+
     function isOnline(lastSeen) {
       if (!lastSeen) return false;
-      return Date.now() - new Date(lastSeen).getTime() < ONLINE_MS;
-    }
-
-    // ── Форматирование времени учёбы ─────────────────────────────────
-    function formatElapsed(iso) {
-      if (!iso) return '';
-      const diff = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
-      const h = Math.floor(diff / 3600);
-      const m = Math.floor((diff % 3600) / 60);
-      const s = diff % 60;
-      return `${h}ч ${String(m).padStart(2,'0')}м ${String(s).padStart(2,'0')}с`;
-    }
-
-    // ── Рендер списка (вызывается и при fetch, и каждую секунду) ─────
-    let cachedUsers = [];
-
-    function renderUsers(data) {
-      const onlineCount = data.filter(u => isOnline(u.last_seen)).length;
-
-      if (onlineCount > 0) {
-        onlineSummaryText.textContent = `Онлайн сейчас: ${onlineCount} из ${data.length}`;
-        onlineSummary.classList.remove('hidden');
-      } else {
-        onlineSummary.classList.add('hidden');
-      }
-
-      usersEl.innerHTML = data.map(user => {
-        const online     = isOnline(user.last_seen);
-        const isStudying = user.status === '📚 Учусь';
-
-        // Показываем таймер только онлайн-ученикам
-        const timerHtml = (isStudying && online && user.status_changed_at)
-          ? `<div class="study-timer" data-start="${escapeHtml(user.status_changed_at)}">
-               ⏱ ${formatElapsed(user.status_changed_at)}
-             </div>`
-          : '';
-
-        return `
-          <div class="user-item">
-            <div class="status-dot" style="background:${escapeHtml(user.color || '#cbd5e1')}"></div>
-            <div class="user-info">
-              <strong>${escapeHtml(user.username || 'Без имени')}</strong>
-              <div class="status-text">${escapeHtml(user.status || 'Статус не задан')}</div>
-              ${timerHtml}
-            </div>
-            <div class="user-item-right">
-              ${online
-                ? `<span class="online-pill">Онлайн</span>`
-                : `<span class="offline-pill">Офлайн</span>`}
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // ── Тик таймеров каждую секунду (без запросов к БД) ─────────────
-    function tickTimers() {
-      document.querySelectorAll('.study-timer[data-start]').forEach(el => {
-        el.textContent = '⏱ ' + formatElapsed(el.dataset.start);
-      });
-    }
-
-    // ── Heartbeat — обновляет last_seen каждые 30 секунд ─────────────
-    async function heartbeat() {
-      const user = await getCurrentUser();
-      if (!user) return;
-      await supabase.from('profiles')
-        .update({ last_seen: new Date().toISOString() })
-        .eq('id', user.id);
-    }
-
-    // ── Auth helpers ─────────────────────────────────────────────────
-    async function signInWithGoogle() {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + window.location.pathname }
-      });
-      if (error) { console.error(error); alert('Ошибка входа через Google'); }
-    }
-
-    async function signOut() {
-      try { await supabase.auth.signOut({ scope: 'local' }); } catch(e) { console.error(e); }
-      await refreshAuthState();
-      await fetchGroup();
-    }
-
-    async function getCurrentUser() {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) { console.error(error); return null; }
-      return data.user ?? null;
+      return (Date.now() - new Date(lastSeen).getTime()) < ONLINE_WINDOW_MS;
     }
 
     function buildUsername(user) {
@@ -344,115 +335,321 @@
         || 'Пользователь';
     }
 
-    // ── Создаём профиль только при первом входе ──────────────────────
-    async function ensureProfile(user) {
-      const { data: existing } = await supabase
-        .from('profiles').select('id').eq('id', user.id).single();
-
-      if (!existing) {
-        await supabase.from('profiles').insert({
-          id: user.id,
-          email: user.email ?? null,
-          username: buildUsername(user),
-          status: 'Онлайн',
-          color: '#01696f',
-          status_changed_at: new Date().toISOString(),
-          last_seen: new Date().toISOString()
-        });
-      } else {
-        // Просто обновляем last_seen при каждом входе
-        await supabase.from('profiles')
-          .update({ last_seen: new Date().toISOString() })
-          .eq('id', user.id);
-      }
+    async function signInWithGoogle() {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + window.location.pathname
+        }
+      });
     }
 
-    async function refreshAuthState() {
-      const user = await getCurrentUser();
-      if (!user) {
-        authInfo.textContent = 'Вы не авторизованы.';
-        myInfo.textContent   = 'Сначала войдите через Google.';
-        googleBtn.classList.remove('hidden');
-        logoutBtn.classList.add('hidden');
-        setStatusButtonsDisabled(true);
+    async function getCurrentUser() {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('getUser error', error);
         return null;
       }
-
-      await ensureProfile(user);
-      authInfo.textContent = `Вы вошли как: ${buildUsername(user)} (${user.email})`;
-      googleBtn.classList.add('hidden');
-      logoutBtn.classList.remove('hidden');
-      setStatusButtonsDisabled(false);
-      return user;
+      return data.user ?? null;
     }
 
-    // ── Загрузка группы ───────────────────────────────────────────────
-    async function fetchGroup() {
-      const currentUser = await getCurrentUser();
+    async function ensureProfile(user) {
+      const username = buildUsername(user);
 
+      const { data: existing, error: selectError } = await supabase
+        .from('profiles')
+        .select('id, username, status, color, last_seen, status_changed_at')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (selectError) {
+        console.error('ensureProfile select error', selectError);
+      }
+
+      if (!existing) {
+        const payload = {
+          id: user.id,
+          email: user.email ?? null,
+          username,
+          status: '📚 Учусь',
+          color: '#28a745',
+          last_seen: new Date().toISOString(),
+          status_changed_at: new Date().toISOString()
+        };
+
+        const { error: insertError } = await supabase.from('profiles').insert(payload);
+        if (insertError) console.error('ensureProfile insert error', insertError);
+      } else {
+        const updates = {
+          username: existing.username || username,
+          email: user.email ?? null,
+          last_seen: new Date().toISOString()
+        };
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', user.id);
+
+        if (updateError) console.error('ensureProfile update error', updateError);
+      }
+    }
+
+    async function fetchMyProfile() {
+      if (!me) return;
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, username, email, status, color, last_seen, status_changed_at')
+        .select('*')
+        .eq('id', me.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('fetchMyProfile error', error);
+        return;
+      }
+
+      myProfile = data;
+      renderMe();
+    }
+
+    function renderMe() {
+      const displayName = myProfile?.username || buildUsername(me);
+      mainNameEl.textContent = displayName;
+
+      if (!myProfile) {
+        bigTimerTextEl.textContent = '0 сек.';
+        breakBtnEl.textContent = '☕ Перерыв';
+        return;
+      }
+
+      if (myProfile.status === '📚 Учусь') {
+        bigTimerTextEl.textContent = formatShortDuration(myProfile.status_changed_at);
+        breakBtnEl.textContent = '☕ Перерыв';
+      } else if (myProfile.status === '☕ Перерыв') {
+        bigTimerTextEl.textContent = 'Перерыв';
+        breakBtnEl.textContent = '📚 Продолжить';
+      } else {
+        bigTimerTextEl.textContent = 'Сессия завершена';
+        breakBtnEl.textContent = '📚 Начать заново';
+      }
+    }
+
+    async function fetchGroup() {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, username, status, color, last_seen, status_changed_at')
         .order('username', { ascending: true });
 
       if (error) {
-        console.error('fetchGroup error:', error);
-        usersEl.innerHTML = `<div class="muted">Не удалось загрузить список. Проверь RLS.</div>`;
+        console.error('fetchGroup error', error);
+        usersListEl.innerHTML = '<div class="muted">Не удалось загрузить группу.</div>';
         return;
       }
 
-      if (!data?.length) {
-        usersEl.innerHTML = `<div class="muted">Пока нет участников.</div>`;
+      groupUsers = data || [];
+      renderGroup();
+    }
+
+    function renderGroup() {
+      if (!groupUsers.length) {
+        usersListEl.innerHTML = '<div class="muted">Пока нет участников.</div>';
         return;
       }
 
-      cachedUsers = data;
-      renderUsers(data);
+      usersListEl.innerHTML = groupUsers.map(user => {
+        const online = isOnline(user.last_seen);
+        const studying = user.status === '📚 Учусь';
+        const dotClass = online ? 'dot online' : 'dot';
+        const statusText = escapeHtml(user.status || 'Без статуса');
+        const onlineText = online
+          ? '<div class="user-online is-online">● онлайн</div>'
+          : '<div class="user-online">● офлайн</div>';
+        const studyTime = studying
+          ? `<div class="user-study-time">⏱ ${escapeHtml(formatStudySmall(user.status_changed_at))}</div>`
+          : '';
 
-      if (currentUser) {
-        const me = data.find(u => u.id === currentUser.id);
-        myInfo.textContent = me
-          ? `Вы зашли как: ${me.username} • статус: ${me.status}`
-          : 'Вы вошли, но профиль ещё не найден.';
+        return `
+          <div class="user-item">
+            <div class="user-left">
+              <div class="${dotClass}"></div>
+              <div class="user-name">${escapeHtml(user.username || 'Без имени')}</div>
+            </div>
+
+            <div class="user-right">
+              <div class="user-status">${statusText}</div>
+              ${studyTime}
+              ${onlineText}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function fetchMessages() {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, username, text, created_at')
+        .order('created_at', { ascending: true })
+        .limit(CHAT_LIMIT);
+
+      if (error) {
+        console.error('fetchMessages error', error);
+        chatBoxEl.innerHTML = '<div class="muted">Чат не загрузился.</div>';
+        return;
+      }
+
+      chatMessages = data || [];
+      renderMessages();
+    }
+
+    function renderMessages() {
+      if (!chatMessages.length) {
+        chatBoxEl.innerHTML = '<div class="muted">Пока нет сообщений.</div>';
+        return;
+      }
+
+      chatBoxEl.innerHTML = chatMessages.map(msg => `
+        <div class="chat-line">
+          <strong>${escapeHtml(msg.username)}:</strong> ${escapeHtml(msg.text)}
+        </div>
+      `).join('');
+
+      chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
+    }
+
+    async function sendMessage(text) {
+      if (!me || !myProfile) return;
+      const clean = text.trim();
+      if (!clean) return;
+
+      const { error } = await supabase.from('messages').insert({
+        user_id: me.id,
+        username: myProfile.username || buildUsername(me),
+        text: clean
+      });
+
+      if (error) {
+        console.error('sendMessage error', error);
+        alert('Не удалось отправить сообщение');
+        return;
+      }
+
+      chatInputEl.value = '';
+      await fetchMessages();
+    }
+
+    async function setStatus(status, color) {
+      if (!me) return;
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          status,
+          color,
+          status_changed_at: new Date().toISOString(),
+          last_seen: new Date().toISOString()
+        })
+        .eq('id', me.id);
+
+      if (error) {
+        console.error('setStatus error', error);
+        alert('Не удалось обновить статус');
+        return;
+      }
+
+      await fetchMyProfile();
+      await fetchGroup();
+    }
+
+    async function toggleBreak() {
+      if (!myProfile) return;
+
+      if (myProfile.status === '☕ Перерыв') {
+        await setStatus('📚 Учусь', '#28a745');
       } else {
-        myInfo.textContent = 'Сначала войдите через Google.';
+        await setStatus('☕ Перерыв', '#f5bf08');
       }
     }
 
-    // ── Смена статуса — сбрасывает status_changed_at ─────────────────
-    window.changeStatus = async (text, color) => {
-      const user = await getCurrentUser();
-      if (!user) { alert('Сначала войдите через Google'); return; }
+    async function endSession() {
+      await setStatus('⛔ Сессия завершена', '#e33445');
+    }
 
-      const { error } = await supabase.from('profiles').update({
-        status: text,
-        color,
-        status_changed_at: new Date().toISOString()   // сброс таймера
-      }).eq('id', user.id);
+    async function heartbeat() {
+      if (!me) return;
 
-      if (error) {
-        console.error(error);
-        alert('Ошибка обновления статуса. Проверь RLS policies.');
-        return;
-      }
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', me.id);
 
-      await fetchGroup();
-    };
+      if (error) console.error('heartbeat error', error);
+    }
 
-    googleBtn.addEventListener('click', signInWithGoogle);
-    logoutBtn.addEventListener('click', signOut);
+    async function logout() {
+      await supabase.auth.signOut({ scope: 'local' });
+      location.reload();
+    }
+
+    function startRealtime() {
+      supabase.channel('watch-profiles')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, async () => {
+          await fetchMyProfile();
+          await fetchGroup();
+        })
+        .subscribe();
+
+      supabase.channel('watch-messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async () => {
+          await fetchMessages();
+        })
+        .subscribe();
+    }
+
+    function tick() {
+      renderMe();
+      renderGroup();
+    }
+
+    chatFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await sendMessage(chatInputEl.value);
+    });
+
+    breakBtnEl.addEventListener('click', toggleBreak);
+    endSessionBtnEl.addEventListener('click', endSession);
+    logoutBtnEl.addEventListener('click', logout);
 
     supabase.auth.onAuthStateChange(async () => {
-      await refreshAuthState();
-      await fetchGroup();
+      me = await getCurrentUser();
+      if (me) {
+        await ensureProfile(me);
+        await fetchMyProfile();
+        await fetchGroup();
+        await fetchMessages();
+      }
     });
 
     async function init() {
-      await refreshAuthState();
+      me = await getCurrentUser();
+
+      if (!me) {
+        await signInWithGoogle();
+        return;
+      }
+
+      await ensureProfile(me);
+      await fetchMyProfile();
       await fetchGroup();
-      setInterval(fetchGroup,  5_000);   // обновление данных каждые 5 сек
-      setInterval(heartbeat,  30_000);   // пинг last_seen каждые 30 сек
-      setInterval(tickTimers,  1_000);   // плавный тик таймеров без запросов
+      await fetchMessages();
+
+      startRealtime();
+      setInterval(heartbeat, HEARTBEAT_MS);
+      setInterval(fetchGroup, POLL_MS);
+      setInterval(fetchMessages, POLL_MS);
+      setInterval(tick, 1000);
+
+      await heartbeat();
     }
 
     init();

@@ -3,22 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Мониторинг группы 2</title>
+  <title>Мониторинг группы</title>
   <style>
     :root{
       --bg:#ececec;
       --card:#f3f3f3;
-      --border:#dedede;
+      --border:#dfdfdf;
       --text:#1f1f1f;
-      --muted:#9098a3;
+      --muted:#97a0aa;
       --blue:#4285f4;
       --danger:#e53345;
       --warning:#f4bf08;
-      --secondary:#8a93a0;
-      --green:#49d58e;
+      --secondary:#8b94a0;
+      --green:#47d58f;
       --online:#22c55e;
       --shadow:0 10px 24px rgba(0,0,0,.05);
-      --radius:22px;
     }
 
     *{box-sizing:border-box}
@@ -60,8 +59,8 @@
 
     .auth-text{
       font-size:14px;
-      line-height:1.55;
-      color:#6f7782;
+      line-height:1.5;
+      color:#6f7883;
       margin-bottom:18px;
     }
 
@@ -72,7 +71,6 @@
       border-radius:12px;
       background:#fff;
       border:1px solid #d7d7d7;
-      color:#222;
       font-size:15px;
       font-weight:800;
       cursor:pointer;
@@ -88,7 +86,7 @@
     .card{
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:var(--radius);
+      border-radius:22px;
       box-shadow:var(--shadow);
       padding:18px;
       margin-bottom:18px;
@@ -127,15 +125,11 @@
       font-size:14px;
       font-weight:800;
       cursor:pointer;
-      transition:.18s ease;
     }
 
-    .btn:active{transform:translateY(1px)}
-
     .btn-danger{background:var(--danger);color:#fff}
-    .btn-warning{background:var(--warning);color:#202020}
+    .btn-warning{background:var(--warning);color:#222}
     .btn-secondary{background:var(--secondary);color:#fff}
-    .btn-green{background:var(--green);color:#fff}
 
     .btn-row{
       display:grid;
@@ -166,9 +160,7 @@
       border-bottom:1px solid #e7e7e7;
     }
 
-    .user-item:last-child{
-      border-bottom:none;
-    }
+    .user-item:last-child{border-bottom:none}
 
     .user-left{
       display:flex;
@@ -206,14 +198,14 @@
 
     .user-status{
       font-size:13px;
-      color:#7d6f66;
+      color:#7c7067;
       line-height:1.2;
       white-space:nowrap;
     }
 
     .study-time{
       font-size:12px;
-      color:#7aa8ff;
+      color:#7ba8ff;
       margin-top:2px;
       line-height:1.2;
       white-space:nowrap;
@@ -221,7 +213,7 @@
 
     .online-text{
       font-size:11px;
-      color:#9aa4af;
+      color:#9aa3af;
       margin-top:2px;
       line-height:1.2;
       white-space:nowrap;
@@ -249,9 +241,7 @@
       word-break:break-word;
     }
 
-    .chat-line strong{
-      font-weight:900;
-    }
+    .chat-line strong{font-weight:900}
 
     .chat-form{
       display:grid;
@@ -271,11 +261,6 @@
       outline:none;
     }
 
-    .chat-input:focus{
-      border-color:#94c5ff;
-      box-shadow:0 0 0 3px rgba(66,133,244,.12);
-    }
-
     .send-btn{
       border:none;
       border-radius:10px;
@@ -288,7 +273,7 @@
 
     .muted{
       font-size:13px;
-      color:#919aa5;
+      color:#96a0aa;
       text-align:center;
     }
 
@@ -310,12 +295,6 @@
       border-radius:22px 22px 14px 14px;
       box-shadow:0 18px 40px rgba(0,0,0,.18);
       padding:16px;
-      animation:sheetUp .18s ease;
-    }
-
-    @keyframes sheetUp{
-      from{transform:translateY(18px);opacity:.5}
-      to{transform:translateY(0);opacity:1}
     }
 
     .menu-title{
@@ -349,12 +328,10 @@
   </style>
 </head>
 <body>
-  <div id="authScreen" class="auth-screen">
+  <div id="authScreen" class="auth-screen hidden">
     <div class="auth-card">
       <div class="auth-title">Вход</div>
-      <div class="auth-text">
-        Сначала войдите через Google. После входа откроется экран мониторинга, статусы, онлайн и общий чат.
-      </div>
+      <div class="auth-text">Войдите через Google, чтобы открыть монитор группы.</div>
       <button id="googleBtn" class="google-btn" type="button">Войти через Google</button>
     </div>
   </div>
@@ -378,16 +355,12 @@
 
     <div class="card">
       <div class="section-title">🎥 Монитор группы</div>
-      <div id="usersList" class="group-list">
-        <div class="muted">Загрузка списка...</div>
-      </div>
+      <div id="usersList" class="group-list"><div class="muted">Загрузка списка...</div></div>
     </div>
 
     <div class="card">
       <div class="section-title">💬 Общий чат</div>
-      <div id="chatBox" class="chat-box">
-        <div class="muted">Загрузка чата...</div>
-      </div>
+      <div id="chatBox" class="chat-box"><div class="muted">Загрузка чата...</div></div>
 
       <form id="chatForm" class="chat-form">
         <input id="chatInput" class="chat-input" type="text" placeholder="Сообщение..." maxlength="500" />
@@ -399,7 +372,6 @@
   <div id="statusMenu" class="menu-backdrop hidden">
     <div class="menu-sheet">
       <div class="menu-title">Выберите статус</div>
-
       <div class="menu-grid">
         <button class="status-option opt-study" data-status="📚 Учусь" data-color="#28a745" type="button">📚 Учусь</button>
         <button class="status-option opt-break" data-status="☕ Перерыв" data-color="#f4bf08" type="button">☕ Перерыв</button>
@@ -419,9 +391,6 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const ONLINE_WINDOW_MS = 45000;
-    const HEARTBEAT_MS = 20000;
-    const POLL_MS = 5000;
-    const CHAT_LIMIT = 100;
 
     const authScreen = document.getElementById('authScreen');
     const appScreen = document.getElementById('appScreen');
@@ -433,6 +402,7 @@
     const chatBoxEl = document.getElementById('chatBox');
     const chatFormEl = document.getElementById('chatForm');
     const chatInputEl = document.getElementById('chatInput');
+
     const statusMenuBtnEl = document.getElementById('statusMenuBtn');
     const endSessionBtnEl = document.getElementById('endSessionBtn');
     const logoutBtnEl = document.getElementById('logoutBtn');
@@ -444,7 +414,6 @@
     let myProfile = null;
     let groupUsers = [];
     let chatMessages = [];
-    let channels = [];
 
     function escapeHtml(value = '') {
       return String(value)
@@ -486,19 +455,12 @@
       return `${h}ч ${m}м ${s}с`;
     }
 
-    function showError(prefix, error) {
-      console.error(prefix, error);
-      alert(prefix + ': ' + (error?.message || 'unknown error'));
-    }
+    function setView(view) {
+      authScreen.classList.add('hidden');
+      appScreen.classList.add('hidden');
 
-    function updateAuthUI() {
-      if (me) {
-        authScreen.classList.add('hidden');
-        appScreen.classList.remove('hidden');
-      } else {
-        authScreen.classList.remove('hidden');
-        appScreen.classList.add('hidden');
-      }
+      if (view === 'auth') authScreen.classList.remove('hidden');
+      if (view === 'app') appScreen.classList.remove('hidden');
     }
 
     function openMenu() {
@@ -507,6 +469,18 @@
 
     function closeMenu() {
       statusMenuEl.classList.add('hidden');
+    }
+
+    function hardLogoutUI() {
+      me = null;
+      myProfile = null;
+      groupUsers = [];
+      chatMessages = [];
+      setView('auth');
+      mainNameEl.textContent = 'Загрузка...';
+      bigTimerTextEl.textContent = '0 сек.';
+      usersListEl.innerHTML = '<div class="muted">Загрузка списка...</div>';
+      chatBoxEl.innerHTML = '<div class="muted">Загрузка чата...</div>';
     }
 
     async function signInWithGoogle() {
@@ -518,7 +492,8 @@
       });
 
       if (error) {
-        showError('Ошибка входа через Google', error);
+        alert('Ошибка входа: ' + error.message);
+        console.error(error);
         return;
       }
 
@@ -528,30 +503,21 @@
     }
 
     async function signOut() {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        showError('Ошибка выхода', error);
-        return;
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.error('signOut error', e);
       }
 
-      channels.forEach(channel => supabase.removeChannel(channel));
-      channels = [];
-      me = null;
-      myProfile = null;
-      groupUsers = [];
-      chatMessages = [];
-      updateAuthUI();
-      window.location.href = window.location.pathname;
+      hardLogoutUI();
+      setTimeout(() => {
+        window.location.href = window.location.pathname + '?logout=' + Date.now();
+      }, 100);
     }
 
     async function getCurrentUser() {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error('getCurrentUser error', error);
-        return null;
-      }
-      return data.user ?? null;
+      const { data } = await supabase.auth.getUser();
+      return data?.user ?? null;
     }
 
     async function ensureProfile(user) {
@@ -559,44 +525,43 @@
 
       const { data: existing, error: selectError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, username, status, color, last_seen, status_changed_at')
         .eq('id', user.id)
         .maybeSingle();
 
       if (selectError) {
-        showError('Не удалось загрузить профиль', selectError);
-        return;
+        alert('Ошибка profiles select: ' + selectError.message);
+        throw selectError;
       }
 
       if (!existing) {
-        const payload = {
-          id: user.id,
-          username,
-          status: '📚 Учусь',
-          color: '#28a745',
-          last_seen: new Date().toISOString(),
-          status_changed_at: new Date().toISOString()
-        };
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            username,
+            status: '📚 Учусь',
+            color: '#28a745',
+            last_seen: new Date().toISOString(),
+            status_changed_at: new Date().toISOString()
+          });
 
-        const { error: insertError } = await supabase.from('profiles').insert(payload);
         if (insertError) {
-          showError('Не удалось создать профиль', insertError);
-          return;
+          alert('Ошибка profiles insert: ' + insertError.message);
+          throw insertError;
         }
       } else {
-        const payload = {
-          username: existing.username || username,
-          last_seen: new Date().toISOString()
-        };
-
         const { error: updateError } = await supabase
           .from('profiles')
-          .update(payload)
+          .update({
+            username: existing.username || username,
+            last_seen: new Date().toISOString()
+          })
           .eq('id', user.id);
 
         if (updateError) {
-          showError('Не удалось обновить профиль', updateError);
-          return;
+          alert('Ошибка profiles update: ' + updateError.message);
+          throw updateError;
         }
       }
     }
@@ -606,12 +571,13 @@
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, username, status, color, last_seen, status_changed_at')
         .eq('id', me.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        console.error('fetchMyProfile error', error);
+        alert('Ошибка загрузки моего профиля: ' + error.message);
+        console.error(error);
         return;
       }
 
@@ -620,8 +586,7 @@
     }
 
     function renderMe() {
-      const displayName = myProfile?.username || (me ? buildUsername(me) : 'Пользователь');
-      mainNameEl.textContent = displayName;
+      mainNameEl.textContent = myProfile?.username || buildUsername(me) || 'Пользователь';
 
       if (!myProfile) {
         bigTimerTextEl.textContent = '0 сек.';
@@ -629,10 +594,8 @@
         return;
       }
 
-      const startedAt = myProfile.status_changed_at || new Date().toISOString();
-
       if (myProfile.status === '📚 Учусь') {
-        bigTimerTextEl.textContent = formatBigTimer(startedAt);
+        bigTimerTextEl.textContent = formatBigTimer(myProfile.status_changed_at);
       } else if (myProfile.status === '☕ Перерыв') {
         bigTimerTextEl.textContent = 'Перерыв';
       } else if (myProfile.status === '🎮 В игре') {
@@ -642,7 +605,7 @@
       } else if (myProfile.status === '⛔ Сессия завершена') {
         bigTimerTextEl.textContent = 'Сессия завершена';
       } else {
-        bigTimerTextEl.textContent = formatBigTimer(startedAt);
+        bigTimerTextEl.textContent = '0 сек.';
       }
 
       statusMenuBtnEl.textContent = myProfile.status || '☕ Перерыв';
@@ -655,8 +618,8 @@
         .order('username', { ascending: true });
 
       if (error) {
-        console.error('fetchGroup error', error);
-        usersListEl.innerHTML = '<div class="muted">Не удалось загрузить список.</div>';
+        usersListEl.innerHTML = '<div class="muted">Ошибка загрузки списка</div>';
+        console.error(error);
         return;
       }
 
@@ -680,13 +643,10 @@
               <div class="status-dot ${online ? 'online' : ''}"></div>
               <div class="user-name">${escapeHtml(user.username || 'Без имени')}</div>
             </div>
-
             <div class="user-right">
               <div class="user-status">${escapeHtml(user.status || 'Без статуса')}</div>
               ${studying ? `<div class="study-time">⏱ ${escapeHtml(formatStudyTime(user.status_changed_at))}</div>` : ''}
-              <div class="online-text ${online ? 'is-online' : ''}">
-                ${online ? '● Онлайн' : '● Офлайн'}
-              </div>
+              <div class="online-text ${online ? 'is-online' : ''}">${online ? '● Онлайн' : '● Офлайн'}</div>
             </div>
           </div>
         `;
@@ -698,11 +658,11 @@
         .from('messages')
         .select('id, username, text, created_at')
         .order('created_at', { ascending: true })
-        .limit(CHAT_LIMIT);
+        .limit(100);
 
       if (error) {
-        console.error('fetchMessages error', error);
-        chatBoxEl.innerHTML = '<div class="muted">Чат не загрузился.</div>';
+        chatBoxEl.innerHTML = '<div class="muted">Ошибка загрузки чата</div>';
+        console.error(error);
         return;
       }
 
@@ -717,31 +677,27 @@
       }
 
       chatBoxEl.innerHTML = chatMessages.map(msg => `
-        <div class="chat-line">
-          <strong>${escapeHtml(msg.username)}:</strong> ${escapeHtml(msg.text)}
-        </div>
+        <div class="chat-line"><strong>${escapeHtml(msg.username)}:</strong> ${escapeHtml(msg.text)}</div>
       `).join('');
 
       chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
     }
 
     async function sendMessage(text) {
-      if (!me || !myProfile) {
-        alert('Нет авторизации');
-        return;
-      }
-
       const clean = text.trim();
-      if (!clean) return;
+      if (!clean || !me || !myProfile) return;
 
-      const { error } = await supabase.from('messages').insert({
-        user_id: me.id,
-        username: myProfile.username || buildUsername(me),
-        text: clean
-      });
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          user_id: me.id,
+          username: myProfile.username || buildUsername(me),
+          text: clean
+        });
 
       if (error) {
-        showError('Не удалось отправить сообщение', error);
+        alert('Ошибка отправки сообщения: ' + error.message);
+        console.error(error);
         return;
       }
 
@@ -752,26 +708,25 @@
     async function setStatus(status, color) {
       if (!me) return;
 
-      const payload = {
-        status,
-        color,
-        last_seen: new Date().toISOString(),
-        status_changed_at: new Date().toISOString()
-      };
-
       const { error } = await supabase
         .from('profiles')
-        .update(payload)
+        .update({
+          status,
+          color,
+          last_seen: new Date().toISOString(),
+          status_changed_at: new Date().toISOString()
+        })
         .eq('id', me.id);
 
       if (error) {
-        showError('Не удалось обновить статус', error);
+        alert('Ошибка обновления статуса: ' + error.message);
+        console.error(error);
         return;
       }
 
+      closeMenu();
       await fetchMyProfile();
       await fetchGroup();
-      closeMenu();
     }
 
     async function endSession() {
@@ -781,38 +736,17 @@
     async function heartbeat() {
       if (!me) return;
 
-      const { error } = await supabase
+      await supabase
         .from('profiles')
         .update({ last_seen: new Date().toISOString() })
         .eq('id', me.id);
-
-      if (error) {
-        console.error('heartbeat error', error);
-      }
     }
 
     function tick() {
-      renderMe();
+      if (myProfile?.status === '📚 Учусь') {
+        bigTimerTextEl.textContent = formatBigTimer(myProfile.status_changed_at);
+      }
       renderGroup();
-    }
-
-    function startRealtime() {
-      const profilesChannel = supabase
-        .channel('profiles-live')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, async () => {
-          await fetchMyProfile();
-          await fetchGroup();
-        })
-        .subscribe();
-
-      const messagesChannel = supabase
-        .channel('messages-live')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, async () => {
-          await fetchMessages();
-        })
-        .subscribe();
-
-      channels.push(profilesChannel, messagesChannel);
     }
 
     googleBtn.addEventListener('click', signInWithGoogle);
@@ -836,36 +770,31 @@
       await sendMessage(chatInputEl.value);
     });
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      me = session?.user ?? null;
-      updateAuthUI();
-
-      if (!me) return;
-
-      await ensureProfile(me);
-      await fetchMyProfile();
-      await fetchGroup();
-      await fetchMessages();
-    });
-
     async function init() {
-      me = await getCurrentUser();
-      updateAuthUI();
+      try {
+        me = await getCurrentUser();
 
-      if (!me) return;
+        if (!me) {
+          setView('auth');
+          return;
+        }
 
-      await ensureProfile(me);
-      await fetchMyProfile();
-      await fetchGroup();
-      await fetchMessages();
-      await heartbeat();
+        setView('app');
 
-      startRealtime();
+        await ensureProfile(me);
+        await fetchMyProfile();
+        await fetchGroup();
+        await fetchMessages();
+        await heartbeat();
 
-      setInterval(heartbeat, HEARTBEAT_MS);
-      setInterval(fetchGroup, POLL_MS);
-      setInterval(fetchMessages, POLL_MS);
-      setInterval(tick, 1000);
+        setInterval(heartbeat, 20000);
+        setInterval(fetchGroup, 5000);
+        setInterval(fetchMessages, 5000);
+        setInterval(tick, 1000);
+      } catch (e) {
+        console.error('INIT ERROR', e);
+        alert('Ошибка инициализации: ' + (e?.message || 'unknown'));
+      }
     }
 
     init();

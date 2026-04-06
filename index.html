@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Мониторинг группы 1</title>
+    <title>Мониторинг группы</title>
     <style>
         /* ══════════════════════════════════════
      ТОКЕНЫ
@@ -1354,6 +1354,14 @@
             return `${h}ч ${m}м ${s}с`;
         }
 
+        function getLiveStudySeconds(user) {
+            let total = Number(user.total_study_seconds) || 0;
+            if (user.status === STUDY_STATUS && user.status_changed_at) {
+                total += toDurationSec(user.status_changed_at);
+            }
+            return total;
+        }
+
         function formatShortSeconds(totalSec = 0) {
             const sec = Math.max(0, Number(totalSec) || 0);
             const h = Math.floor(sec / 3600);
@@ -1804,9 +1812,19 @@
         function renderPresenceSummary() {
             if (!summaryStudyingEl || !summaryBreakEl || !summaryOfflineEl) return;
 
-            const studyingCount = groupUsers.filter(user => user.status === STUDY_STATUS).length;
-            const breakCount = groupUsers.filter(user => user.status === '☕ Перерыв').length;
-            const offlineCount = groupUsers.filter(user => !isOnline(user.last_seen)).length;
+            // Считаем только онлайн-пользователей для первых двух групп,
+            // офлайн — всех у кого last_seen устарел
+            const studyingCount = groupUsers.filter(u =>
+                isOnline(u.last_seen) && u.status === STUDY_STATUS
+            ).length;
+
+            const breakCount = groupUsers.filter(u =>
+                isOnline(u.last_seen) && u.status !== STUDY_STATUS
+            ).length;
+
+            const offlineCount = groupUsers.filter(u =>
+                !isOnline(u.last_seen)
+            ).length;
 
             summaryStudyingEl.textContent = studyingCount;
             summaryBreakEl.textContent = breakCount;
@@ -1843,24 +1861,30 @@
                 return;
             }
 
-            leaderboardListEl.innerHTML = leaderboardUsers.map((user, index) => {
+            // Сортируем по реальному времени (включая текущую сессию)
+            const sorted = [...leaderboardUsers].sort((a, b) =>
+                getLiveStudySeconds(b) - getLiveStudySeconds(a)
+            );
+
+            leaderboardListEl.innerHTML = sorted.map((user, index) => {
                 const rank = index + 1;
                 const medal = getMedalByRank(rank);
                 const initials = getInitials(user.username || 'П');
+                const liveTime = getLiveStudySeconds(user);
 
                 return `
-        <div class="leader-item ${rank <= 3 ? `top-${rank}` : ''}">
-          <div class="leader-left">
-            <div class="leader-rank">${escapeHtml(medal)}</div>
-            <div class="leader-avatar" style="background:${escapeHtml(user.color || '#4b5563')}">${escapeHtml(initials)}</div>
-            <div class="leader-meta">
-              <div class="leader-name">${escapeHtml(user.username || 'Без имени')}</div>
-              <div class="leader-sub">${Number(user.session_count) || 0} сессий</div>
-            </div>
+      <div class="leader-item ${rank <= 3 ? `top-${rank}` : ''}">
+        <div class="leader-left">
+          <div class="leader-rank">${escapeHtml(medal)}</div>
+          <div class="leader-avatar" style="background:${escapeHtml(user.color || '#4b5563')}">${escapeHtml(initials)}</div>
+          <div class="leader-meta">
+            <div class="leader-name">${escapeHtml(user.username || 'Без имени')}</div>
+            <div class="leader-sub">${Number(user.session_count) || 0} сессий</div>
           </div>
-          <div class="leader-right">${escapeHtml(formatSeconds(user.total_study_seconds || 0))}</div>
         </div>
-      `;
+        <div class="leader-right">${escapeHtml(formatSeconds(liveTime))}</div>
+      </div>
+    `;
             }).join('');
         }
 
@@ -2012,6 +2036,11 @@
                 bigTimerTextEl.textContent = formatBigTimer(myProfile.status_changed_at);
             }
             renderGroup();
+
+            // Обновляем рейтинг каждую секунду (только DOM, без запроса к БД)
+            if (activeTab === 'leaderboard') {
+                renderLeaderboard();
+            }
         }
 
         googleBtn.addEventListener('click', signInWithGoogle);

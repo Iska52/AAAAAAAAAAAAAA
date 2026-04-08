@@ -58,6 +58,10 @@ let myAchievements = [];
 let myAchievementIds = new Set();
 let activeTab = 'participants';
 
+// ── Realtime channel references (Group 2) ───────────────────────────────────
+let chatChannel = null;
+let groupChannel = null;
+
 function escapeHtml(value = '') {
     return String(value)
         .replaceAll('&', '&amp;')
@@ -164,6 +168,7 @@ async function signInWithGoogle() {
 }
 
 async function signOut() {
+    unsubscribeAll();
     try { await supabase.auth.signOut(); } catch (e) { console.error('signOut error', e); }
     hardLogoutUI();
     setTimeout(() => { window.location.href = window.location.pathname + '?logout=' + Date.now(); }, 100);
@@ -242,6 +247,358 @@ async function fetchMyAchievements() {
     renderProfileAchievements();
     renderAchievements();
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// ГРУППА 1 — СТАТИСТИКА И ДАННЫЕ
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * fetchMyDetailedStats()
+ *
+ * Загружает детальную статистику текущего пользователя из таблиц profiles и
+ * messages, вычисляет на клиенте:
+ *   • среднюю продолжительность одной сессии (total_study_seconds / session_count)
+ *   • самую длинную сессию (longest_session_sec — уже хранится в profiles)
+ *   • количество сообщений в чате (message_count из profiles)
+ *   • топ-час активности — час суток, в который отправлено больше всего сообщений
+ *
+ * Возвращает объект { avgSessionSec, longestSessionSec, messageCount, topHour }
+ * или null при ошибке.
+ */
+async function fetchMyDetailedStats() {
+    if (!me) return null;
+
+    // 1. Берём профиль (total_study_seconds, session_count, longest_session_sec, message_count)
+    const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('total_study_seconds, session_count, longest_session_sec, message_count')
+        .eq('id', me.id)
+        .maybeSingle();
+
+    if (profileError) {
+        console.error('fetchMyDetailedStats: profiles error', profileError);
+        return null;
+    }
+
+    const totalSec    = Number(profile?.total_study_seconds) || 0;
+    const sessions    = Number(profile?.session_count) || 0;
+    const avgSessionSec  = sessions > 0 ? Math.round(totalSec / sessions) : 0;
+    const longestSessionSec = Number(profile?.longest_session_sec) || 0;
+    const messageCount  = Number(profile?.message_count) || 0;
+
+    // 2. Загружаем все сообщения пользователя, чтобы найти топ-час активности
+    const { data: myMessages, error: msgError } = await supabase
+        .from('messages')
+        .select('created_at')
+        .eq('user_id', me.id);
+
+    if (msgError) {
+        console.error('fetchMyDetailedStats: messages error', msgError);
+        // Возвращаем частичные данные без topHour
+        return { avgSessionSec, longestSessionSec, messageCount, topHour: null };
+    }
+
+    // Считаем по часам
+    const hourCounts = new Array(24).fill(0);
+    (myMessages || []).forEach(msg => {
+        const hour = new Date(msg.created_at).getHours();
+        hourCounts[hour]++;
+    });
+
+    const maxCount = Math.max(...hourCounts);
+    const topHour  = maxCount > 0 ? hourCounts.indexOf(maxCount) : null;
+
+    const stats = { avgSessionSec, longestSessionSec, messageCount, topHour };
+
+    console.log('[fetchMyDetailedStats]', stats);
+    renderDetailedStats(stats);
+    return stats;
+}
+
+/**
+ * renderDetailedStats(stats)
+ *
+ * Отрисовывает детальную статистику в блоке #profileStats под основными плитками.
+ */
+function renderDetailedStats(stats) {
+    if (!profileStatsEl) return;
+
+    const topHourLabel = stats.topHour !== null
+        ? `${stats.topHour}:00–${stats.topHour + 1}:00`
+        : '—';
+
+    // Добавляем расширенный блок после уже существующих плиток
+    const existingDetailed = profileStatsEl.querySelector('.detailed-stats');
+    if (existingDetailed) existingDetailed.remove();
+
+    const div = document.createElement('div');
+    div.className = 'detailed-stats';
+    div.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;';
+    div.innerHTML = `
+        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:15px;font-weight:700;color:#fff">${escapeHtml(formatSeconds(stats.avgSessionSec))}</div>
+            <div style="color:rgba(255,255,255,0.55);margin-top:2px;">СРЕДНЯЯ СЕССИЯ</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:15px;font-weight:700;color:#fff">${escapeHtml(formatSeconds(stats.longestSessionSec))}</div>
+            <div style="color:rgba(255,255,255,0.55);margin-top:2px;">РЕКОРД СЕССИИ</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:15px;font-weight:700;color:#fff">${stats.messageCount}</div>
+            <div style="color:rgba(255,255,255,0.55);margin-top:2px;">СООБЩЕНИЙ</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:15px;font-weight:700;color:#fff">${escapeHtml(topHourLabel)}</div>
+            <div style="color:rgba(255,255,255,0.55);margin-top:2px;">ТОП-ЧАС</div>
+        </div>
+    `;
+    profileStatsEl.appendChild(div);
+}
+
+/**
+ * fetchAchievementLeaders()
+ *
+ * Загружает рейтинг пользователей по количеству полученных достижений.
+ * Делает запрос к таблице user_achievements, группирует по user_id,
+ * присоединяет username из profiles и сортирует по убыванию count.
+ *
+ * Возвращает массив { username, count } или [] при ошибке.
+ *
+ * Примечание: Supabase JS-клиент не поддерживает GROUP BY напрямую,
+ * поэтому выбираем все строки и агрегируем на клиенте. Для больших
+ * таблиц рекомендуется создать Postgres View или RPC-функцию.
+ */
+async function fetchAchievementLeaders() {
+    // Загружаем все записи из user_achievements
+    const { data: rows, error: achError } = await supabase
+        .from('user_achievements')
+        .select('user_id');
+
+    if (achError) {
+        console.error('fetchAchievementLeaders: user_achievements error', achError);
+        return [];
+    }
+
+    // Считаем достижения на клиенте
+    const countMap = {};
+    (rows || []).forEach(row => {
+        countMap[row.user_id] = (countMap[row.user_id] || 0) + 1;
+    });
+
+    if (!Object.keys(countMap).length) return [];
+
+    // Загружаем имена пользователей
+    const ids = Object.keys(countMap);
+    const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', ids);
+
+    if (profileError) {
+        console.error('fetchAchievementLeaders: profiles error', profileError);
+        return [];
+    }
+
+    // Собираем итоговый рейтинг
+    const leaders = (profiles || [])
+        .map(p => ({ username: p.username || 'Пользователь', count: countMap[p.id] || 0 }))
+        .sort((a, b) => b.count - a.count);
+
+    console.log('[fetchAchievementLeaders]', leaders);
+    renderAchievementLeaders(leaders);
+    return leaders;
+}
+
+/**
+ * renderAchievementLeaders(leaders)
+ *
+ * Отрисовывает рейтинг по достижениям в конце таба «Достижения».
+ */
+function renderAchievementLeaders(leaders) {
+    const panelEl = document.querySelector('[data-tab-panel="achievements"]');
+    if (!panelEl) return;
+
+    let leaderEl = panelEl.querySelector('.achievement-leaders');
+    if (!leaderEl) {
+        leaderEl = document.createElement('div');
+        leaderEl.className = 'achievement-leaders';
+        leaderEl.style.cssText = 'margin-top:16px;';
+        panelEl.appendChild(leaderEl);
+    }
+
+    leaderEl.innerHTML = `
+        <div class="section-label" style="margin-bottom:8px;">🏅 РЕЙТИНГ ПО ДОСТИЖЕНИЯМ</div>
+        ${leaders.slice(0, 10).map((item, i) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:6px;">
+                <span style="font-weight:600;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`} ${escapeHtml(item.username)}</span>
+                <span style="color:rgba(255,255,255,0.7);font-size:13px;">${item.count} достиж.</span>
+            </div>
+        `).join('')}
+    `;
+}
+
+/**
+ * deleteOldMessages(daysOld = 7)
+ *
+ * Удаляет сообщения из таблицы messages, созданные более daysOld дней назад.
+ * Вызывается автоматически при инициализации (раз при загрузке).
+ *
+ * Требует, чтобы в Supabase RLS была политика DELETE для авторизованных
+ * пользователей (или политика для владельца сообщения).
+ *
+ * Возвращает количество удалённых строк или null при ошибке.
+ */
+async function deleteOldMessages(daysOld = 7) {
+    const cutoff = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data, error, count } = await supabase
+        .from('messages')
+        .delete({ count: 'exact' })
+        .lt('created_at', cutoff);
+
+    if (error) {
+        // Не ломаем приложение — просто логируем
+        console.warn('[deleteOldMessages] Ошибка очистки чата (возможно, нет прав):', error.message);
+        return null;
+    }
+
+    const deleted = count ?? (data?.length ?? 0);
+    if (deleted > 0) {
+        console.log(`[deleteOldMessages] Удалено ${deleted} сообщений старше ${daysOld} дней`);
+    }
+    return deleted;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ГРУППА 2 — REALTIME ПОДПИСКИ
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * subscribeToChat()
+ *
+ * Подписывается на INSERT-события таблицы messages через Supabase Realtime.
+ * При появлении нового сообщения добавляет его в локальный массив chatMessages
+ * и перерисовывает чат — без повторного запроса к БД.
+ *
+ * Заменяет setInterval(fetchMessages, 5000).
+ * Возвращает объект канала (RealtimeChannel).
+ */
+function subscribeToChat() {
+    // Если канал уже открыт — не дублируем
+    if (chatChannel) return chatChannel;
+
+    chatChannel = supabase
+        .channel('realtime:messages')
+        .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'messages' },
+            (payload) => {
+                const newMsg = payload.new;
+                // Избегаем дублей (на случай если fetchMessages сработал параллельно)
+                if (!chatMessages.find(m => m.id === newMsg.id)) {
+                    chatMessages.push(newMsg);
+                    // Держим не более 100 сообщений в памяти
+                    if (chatMessages.length > 100) chatMessages.shift();
+                    renderMessages();
+                }
+            }
+        )
+        .subscribe((status) => {
+            console.log('[subscribeToChat] статус канала:', status);
+        });
+
+    return chatChannel;
+}
+
+/**
+ * subscribeToGroup()
+ *
+ * Подписывается на INSERT и UPDATE события таблицы profiles через Supabase Realtime.
+ * При изменении любого профиля обновляет локальный массив groupUsers и перерисовывает:
+ *   • список участников
+ *   • сводку присутствия (УЧАТСЯ / ПЕРЕРЫВ / ОФЛАЙН)
+ *   • рейтинг (если активен соответствующий таб)
+ *
+ * Заменяет setInterval(fetchGroup, 5000) и setInterval(fetchLeaderboard, 5000).
+ * Возвращает объект канала (RealtimeChannel).
+ */
+function subscribeToGroup() {
+    if (groupChannel) return groupChannel;
+
+    groupChannel = supabase
+        .channel('realtime:profiles')
+        .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'profiles' },
+            (payload) => {
+                const newUser = payload.new;
+                if (!groupUsers.find(u => u.id === newUser.id)) {
+                    groupUsers.push(newUser);
+                }
+                renderGroup();
+                renderPresenceSummary();
+            }
+        )
+        .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'profiles' },
+            (payload) => {
+                const updated = payload.new;
+
+                // Обновляем в groupUsers
+                const idx = groupUsers.findIndex(u => u.id === updated.id);
+                if (idx !== -1) {
+                    groupUsers[idx] = { ...groupUsers[idx], ...updated };
+                } else {
+                    groupUsers.push(updated);
+                }
+
+                // Обновляем в leaderboardUsers
+                const lIdx = leaderboardUsers.findIndex(u => u.id === updated.id);
+                if (lIdx !== -1) {
+                    leaderboardUsers[lIdx] = { ...leaderboardUsers[lIdx], ...updated };
+                } else {
+                    leaderboardUsers.push(updated);
+                }
+
+                // Если это наш профиль — обновляем локально
+                if (me && updated.id === me.id) {
+                    myProfile = { ...myProfile, ...updated };
+                    renderMe();
+                }
+
+                renderGroup();
+                renderPresenceSummary();
+                if (activeTab === 'leaderboard') renderLeaderboard();
+            }
+        )
+        .subscribe((status) => {
+            console.log('[subscribeToGroup] статус канала:', status);
+        });
+
+    return groupChannel;
+}
+
+/**
+ * unsubscribeAll()
+ *
+ * Отписывается от всех Realtime-каналов и обнуляет ссылки.
+ * Вызывается при выходе из аккаунта.
+ */
+function unsubscribeAll() {
+    if (chatChannel) {
+        supabase.removeChannel(chatChannel);
+        chatChannel = null;
+    }
+    if (groupChannel) {
+        supabase.removeChannel(groupChannel);
+        groupChannel = null;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Остальной код (без изменений)
+// ════════════════════════════════════════════════════════════════════════════
 
 function getMyRank() {
     if (!me || !leaderboardUsers.length) return null;
@@ -322,6 +679,9 @@ function renderMe() {
             <div class="profile-stat"><div class="profile-stat-value">${Number(myProfile.message_count) || 0}</div><div class="profile-stat-label">СООБЩ.</div></div>
             <div class="profile-stat"><div class="profile-stat-value">${myAchievementIds.size}</div><div class="profile-stat-label">ДОСТИЖ.</div></div>
         `;
+        // Обновляем детальную статистику если она уже была загружена
+        const existingDetailed = profileStatsEl.querySelector('.detailed-stats');
+        if (existingDetailed) fetchMyDetailedStats();
     }
     renderProfileAchievements();
 }
@@ -421,6 +781,9 @@ function switchTab(tabName) {
         btn.classList.toggle('active', btn.dataset.tabBtn === tabName));
     document.querySelectorAll('[data-tab-panel]').forEach(panel =>
         panel.classList.toggle('hidden', panel.dataset.tabPanel !== tabName));
+
+    // При переходе на таб достижений — подгружаем рейтинг по достижениям
+    if (tabName === 'achievements') fetchAchievementLeaders();
 }
 
 async function incrementMyMessageCount() {
@@ -442,7 +805,7 @@ async function sendMessage(text) {
     if (error) { alert('Ошибка отправки сообщения: ' + error.message); console.error(error); return; }
     chatInputEl.value = '';
     await incrementMyMessageCount();
-    await fetchMessages();
+    // fetchMessages() больше не нужен — Realtime сам добавит сообщение
     await fetchLeaderboard();
     await syncAchievements();
 }
@@ -463,8 +826,7 @@ async function setStatus(status, color) {
     if (error) { alert('Ошибка обновления статуса: ' + error.message); console.error(error); return; }
     closeMenu();
     await fetchMyProfile();
-    await fetchGroup();
-    await fetchLeaderboard();
+    // fetchGroup() и fetchLeaderboard() больше не нужны — Realtime обновит сам
     await syncAchievements({ previousStatus, newStatus: status, startedHour });
 }
 
@@ -519,11 +881,24 @@ async function init() {
         await syncAchievements();
         await heartbeat();
         switchTab(activeTab);
-        setInterval(heartbeat,       20000);
-        setInterval(fetchGroup,       5000);
-        setInterval(fetchMessages,    5000);
-        setInterval(fetchLeaderboard, 5000);
-        setInterval(tick,             1000);
+
+        // Группа 1: загружаем детальную статистику
+        await fetchMyDetailedStats();
+
+        // Группа 1: тихая очистка старых сообщений (7 дней)
+        deleteOldMessages(7);
+
+        // Группа 2: запускаем Realtime-подписки вместо setInterval для чата и группы
+        subscribeToChat();
+        subscribeToGroup();
+
+        // Heartbeat и тик остаются на интервалах
+        setInterval(heartbeat, 20000);
+        setInterval(tick, 1000);
+
+        // fetchLeaderboard оставляем на интервале — он не покрыт Realtime
+        setInterval(fetchLeaderboard, 10000);
+
     } catch (e) {
         console.error('INIT ERROR', e);
         alert('Ошибка инициализации: ' + (e?.message || 'unknown'));

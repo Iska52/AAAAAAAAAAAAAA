@@ -1,24 +1,20 @@
-// analytics.js — рендерит статистику в существующие элементы index.html:
-// #statsKpis, #chartHourly, #heatmapGrid, #chartTimeline
-// Требует Chart.js загруженного глобально через CDN в index.html
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const SUPABASE_URL = 'https://ugracdwltsflfwieakty.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_zXJ6w0FH5iq2DUTk2kv7BQ_2rpI4LIq';
-const _sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL  = 'https://ugracdwltsflfwieakty.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_zXJ6w0FH5iq2DUTk2kv7BQ_2rpI4LIq';
+const _sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const ACCENT     = '#4f98a3';
 const ACCENT_DIM = 'rgba(79,152,163,0.18)';
-const GRID_COLOR = 'rgba(255,255,255,0.07)';
-const TEXT_COLOR = 'rgba(255,255,255,0.45)';
+const GRID_COL   = 'rgba(255,255,255,0.07)';
+const TEXT_COL   = 'rgba(255,255,255,0.45)';
 
 const _charts = {};
-function _destroyChart(id) {
+function destroyChart(id) {
     if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
 }
 
-function _baseOpts() {
+function baseOptions() {
     return {
         responsive: true,
         maintainAspectRatio: false,
@@ -35,161 +31,61 @@ function _baseOpts() {
             }
         },
         scales: {
-            x: { grid: { color: GRID_COLOR }, ticks: { color: TEXT_COLOR, font: { size: 11 } } },
-            y: { grid: { color: GRID_COLOR }, ticks: { color: TEXT_COLOR, font: { size: 11 } }, beginAtZero: true }
+            x: { grid: { color: GRID_COL }, ticks: { color: TEXT_COL, font: { size: 11 } } },
+            y: { grid: { color: GRID_COL }, ticks: { color: TEXT_COL, font: { size: 11 } }, beginAtZero: true }
         }
     };
 }
 
-// ══════════════════════════════════════════════════════════════
-// ГЛАВНАЯ ЭКСПОРТНАЯ ФУНКЦИЯ
-// ══════════════════════════════════════════════════════════════
-
+// ── Public ────────────────────────────────────────────────────────────────
 export async function renderAnalytics(userId) {
     if (!userId) return;
-    _injectStyles();
-    _renderKpiSkeletons();
-
+    _showSkeletons();
     const [profile, messages] = await Promise.all([
         _fetchProfile(userId),
-        _fetchMessages(userId),
+        _fetchMessages(userId)
     ]);
-
-    if (!profile) {
-        const el = document.getElementById('statsKpis');
-        if (el) el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;">Нет данных</div>';
-        return;
-    }
-
+    if (!profile) { _showError(); return; }
     _renderKpis(profile, messages);
-    _renderHourlyChart(messages);
+    _renderHourly(messages);
     _renderHeatmap(messages);
-    _renderTimelineChart(messages);
+    _renderTimeline(messages);
 }
 
-// ── Запросы ──────────────────────────────────────────────────
-
-async function _fetchProfile(userId) {
+// ── Data ──────────────────────────────────────────────────────────────────
+async function _fetchProfile(uid) {
     const { data, error } = await _sb
         .from('profiles')
-        .select('total_study_seconds, session_count, message_count, longest_session_sec, username')
-        .eq('id', userId)
+        .select('total_study_seconds,session_count,message_count,longest_session_sec')
+        .eq('id', uid)
         .maybeSingle();
     if (error) { console.error('[analytics] profile', error); return null; }
     return data;
 }
-
-async function _fetchMessages(userId) {
+async function _fetchMessages(uid) {
     const { data, error } = await _sb
         .from('messages')
         .select('created_at')
-        .eq('user_id', userId)
+        .eq('user_id', uid)
         .order('created_at', { ascending: true });
     if (error) { console.error('[analytics] messages', error); return []; }
     return data || [];
 }
 
-// ── Стили ────────────────────────────────────────────────────
-
-function _injectStyles() {
-    if (document.getElementById('_analytics_css')) return;
-    const s = document.createElement('style');
-    s.id = '_analytics_css';
-    s.textContent = `
-        @keyframes _shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-
-        .a-kpi-grid{
-            display:grid;
-            grid-template-columns:repeat(2,1fr);
-            gap:10px;
-            margin-bottom:4px;
-        }
-        .a-kpi{
-            background:rgba(255,255,255,0.04);
-            border:1px solid rgba(79,152,163,0.22);
-            border-radius:10px;
-            padding:12px 10px;
-            text-align:center;
-            transition:transform .15s,box-shadow .15s;
-        }
-        .a-kpi:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(79,152,163,0.15);}
-        .a-kpi-icon{font-size:18px;margin-bottom:4px;}
-        .a-kpi-value{
-            font-size:18px;
-            font-weight:700;
-            font-variant-numeric:tabular-nums;
-            color:#fff;
-            line-height:1.2;
-        }
-        .a-kpi-label{
-            font-size:10px;
-            letter-spacing:.06em;
-            text-transform:uppercase;
-            color:rgba(255,255,255,0.4);
-            margin-top:3px;
-        }
-        .a-kpi-sub{
-            font-size:11px;
-            color:rgba(255,255,255,0.3);
-            margin-top:2px;
-        }
-        .a-skeleton{
-            animation:_shimmer 1.4s ease infinite;
-            background:linear-gradient(90deg,rgba(255,255,255,0.05) 25%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.05) 75%);
-            background-size:200% 100%;
-            border-radius:10px;
-        }
-        .heatmap-grid{
-            display:grid;
-            grid-template-columns:repeat(10,1fr);
-            gap:4px;
-        }
-        .heatmap-cell{
-            aspect-ratio:1;
-            border-radius:4px;
-            position:relative;
-            cursor:default;
-            transition:transform .1s;
-        }
-        .heatmap-cell:hover{transform:scale(1.3);z-index:2;}
-        .heatmap-cell:hover .heatmap-tip{display:block;}
-        .heatmap-tip{
-            display:none;
-            position:absolute;
-            bottom:130%;
-            left:50%;
-            transform:translateX(-50%);
-            background:rgba(0,0,0,0.88);
-            color:#fff;
-            font-size:10px;
-            padding:4px 8px;
-            border-radius:6px;
-            white-space:nowrap;
-            pointer-events:none;
-            z-index:10;
-        }
-        .chart-wrap{
-            position:relative;
-            height:140px;
-        }
-    `;
-    document.head.appendChild(s);
-}
-
-// ── Скелетон ─────────────────────────────────────────────────
-
-function _renderKpiSkeletons() {
+// ── Skeletons / Error ─────────────────────────────────────────────────────
+function _showSkeletons() {
     const el = document.getElementById('statsKpis');
     if (!el) return;
-    el.innerHTML = `
-        <div class="a-kpi-grid">
-            ${Array.from({length:4}).map(()=>`<div class="a-kpi a-skeleton" style="height:80px;"></div>`).join('')}
-        </div>
-    `;
+    el.innerHTML = Array.from({ length: 4 }).map(() =>
+        `<div class="stats-kpi stats-skeleton" style="height:72px;"></div>`
+    ).join('');
+}
+function _showError() {
+    const el = document.getElementById('statsKpis');
+    if (el) el.innerHTML = `<div class="muted" style="grid-column:span 2">Не удалось загрузить статистику</div>`;
 }
 
-// ── KPI-плитки ────────────────────────────────────────────────
-
+// ── KPIs ──────────────────────────────────────────────────────────────────
 function _renderKpis(profile, messages) {
     const el = document.getElementById('statsKpis');
     if (!el) return;
@@ -202,48 +98,40 @@ function _renderKpis(profile, messages) {
 
     const hourCounts = new Array(24).fill(0);
     messages.forEach(m => hourCounts[new Date(m.created_at).getHours()]++);
-    const maxHC    = Math.max(...hourCounts);
-    const topHour  = maxHC > 0 ? hourCounts.indexOf(maxHC) : null;
-    const topLabel = topHour !== null ? `${topHour}:00–${topHour+1}:00` : '—';
-    const activeDays = new Set(messages.map(m => m.created_at.slice(0,10))).size;
+    const maxH     = Math.max(...hourCounts);
+    const topHour  = maxH > 0 ? hourCounts.indexOf(maxH) : null;
+    const topLabel = topHour !== null ? `${topHour}:00–${topHour + 1}:00` : '—';
+    const activeDays = new Set(messages.map(m => m.created_at.slice(0, 10))).size;
 
     const kpis = [
-        { icon:'📚', value: _fmtH(totalSec),    label:'ВСЕГО УЧЁБЫ',    sub:`${sessions} сессий` },
-        { icon:'⏱️', value: _fmtD(avgSec),      label:'СРЕДНЯЯ СЕССИЯ', sub:`рекорд: ${_fmtD(longestSec)}` },
-        { icon:'💬', value: msgCount,            label:'СООБЩЕНИЙ',      sub:`${activeDays} активных дней` },
-        { icon:'🕐', value: topLabel,            label:'ТОП-ЧАС',        sub: maxHC > 0 ? `${maxHC} сообщ.` : 'нет данных' },
+        { icon: '📚', value: _fmtH(totalSec),      label: 'ВСЕГО УЧЁБЫ',      sub: `${sessions} сессий` },
+        { icon: '⏱️', value: _fmtD(avgSec),        label: 'СРЕДНЯЯ СЕССИЯ',   sub: `рекорд ${_fmtD(longestSec)}` },
+        { icon: '💬', value: String(msgCount),      label: 'СООБЩЕНИЙ',        sub: `${activeDays} дн. активности` },
+        { icon: '🕐', value: topLabel,              label: 'ТОП-ЧАС',          sub: maxH > 0 ? `${maxH} сообщ.` : 'нет данных' },
     ];
 
-    el.innerHTML = `
-        <div class="a-kpi-grid">
-            ${kpis.map(k=>`
-                <div class="a-kpi">
-                    <div class="a-kpi-icon">${k.icon}</div>
-                    <div class="a-kpi-value">${k.value}</div>
-                    <div class="a-kpi-label">${k.label}</div>
-                    ${k.sub ? `<div class="a-kpi-sub">${k.sub}</div>` : ''}
-                </div>
-            `).join('')}
+    el.innerHTML = kpis.map(k => `
+        <div class="stats-kpi">
+            <div style="font-size:18px;margin-bottom:4px">${k.icon}</div>
+            <div class="stats-kpi-value">${k.value}</div>
+            <div class="stats-kpi-label">${k.label}</div>
+            <div class="stats-kpi-sub">${k.sub}</div>
         </div>
-    `;
+    `).join('');
 }
 
-// ── Бар-чарт по часам ────────────────────────────────────────
-
-function _renderHourlyChart(messages) {
+// ── Chart: Hourly ─────────────────────────────────────────────────────────
+function _renderHourly(messages) {
     const canvas = document.getElementById('chartHourly');
     if (!canvas) return;
-    if (typeof Chart === 'undefined') { console.warn('[analytics] Chart.js not loaded'); return; }
-
     const counts = new Array(24).fill(0);
     messages.forEach(m => counts[new Date(m.created_at).getHours()]++);
-    const labels = Array.from({length:24}, (_,i) => `${i}`);
-    const max = Math.max(...counts, 1);
-    const bgColors = counts.map(v => `rgba(79,152,163,${(0.2 + (v/max)*0.7).toFixed(2)})`);
-    const borderColors = counts.map(v => v === max && v > 0 ? ACCENT : 'transparent');
+    const max    = Math.max(...counts, 1);
+    const labels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+    const bgColors = counts.map(v => `rgba(79,152,163,${(0.25 + (v / max) * 0.65).toFixed(2)})`);
 
-    _destroyChart('hourly');
-    const opts = _baseOpts();
+    destroyChart('hourly');
+    const opts = baseOptions();
     _charts['hourly'] = new Chart(canvas, {
         type: 'bar',
         data: {
@@ -251,106 +139,72 @@ function _renderHourlyChart(messages) {
             datasets: [{
                 data: counts,
                 backgroundColor: bgColors,
-                borderColor: borderColors,
+                borderColor: counts.map(v => v === max ? ACCENT : 'transparent'),
                 borderWidth: 1.5,
-                borderRadius: 3,
+                borderRadius: 4,
                 borderSkipped: false,
             }]
         },
         options: {
             ...opts,
-            plugins: {
-                ...opts.plugins,
-                tooltip: {
-                    ...opts.plugins.tooltip,
-                    callbacks: {
-                        title: ctx => `${ctx[0].label}:00–${Number(ctx[0].label)+1}:00`,
-                        label: ctx => `${ctx.raw} сообщений`
-                    }
-                }
-            },
-            scales: {
-                ...opts.scales,
-                x: {
-                    ...opts.scales.x,
-                    ticks: { ...opts.scales.x.ticks, maxRotation: 0, maxTicksLimit: 12 }
-                }
-            }
+            plugins: { ...opts.plugins, tooltip: { ...opts.plugins.tooltip, callbacks: {
+                title: ctx => `${ctx[0].label} — ${ctx[0].label.replace(':00', ':59')}`,
+                label:  ctx => `${ctx.raw} сообщений`
+            }}},
+            scales: { ...opts.scales, x: { ...opts.scales.x, ticks: { ...opts.scales.x.ticks, maxRotation: 0, maxTicksLimit: 8 } } }
         }
     });
 }
 
-// ── Тепловая карта (30 дней) ─────────────────────────────────
-
+// ── Heatmap ───────────────────────────────────────────────────────────────
 function _renderHeatmap(messages) {
     const grid = document.getElementById('heatmapGrid');
     if (!grid) return;
-
     const dayCounts = {};
     messages.forEach(m => {
-        const d = m.created_at.slice(0,10);
+        const d = m.created_at.slice(0, 10);
         dayCounts[d] = (dayCounts[d] || 0) + 1;
     });
-
     const days = [];
-    const now = new Date();
     for (let i = 29; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        days.push(d.toISOString().slice(0,10));
+        const d = new Date(); d.setDate(d.getDate() - i);
+        days.push(d.toISOString().slice(0, 10));
     }
-
     const max = Math.max(...Object.values(dayCounts), 1);
-    const DOW = ['вс','пн','вт','ср','чт','пт','сб'];
-
-    grid.className = 'heatmap-grid';
+    const dn  = ['вс','пн','вт','ср','чт','пт','сб'];
     grid.innerHTML = days.map(day => {
-        const count = dayCounts[day] || 0;
-        const intensity = count === 0 ? 0 : Math.max(0.15, count / max);
-        const bg = count === 0
-            ? 'rgba(255,255,255,0.07)'
-            : `rgba(79,152,163,${intensity.toFixed(2)})`;
-        const dateObj = new Date(day + 'T12:00:00');
-        const dd = dateObj.getDate().toString().padStart(2,'0');
-        const mm = (dateObj.getMonth()+1).toString().padStart(2,'0');
-        const tip = `${DOW[dateObj.getDay()]} ${dd}.${mm} — ${count} сообщ.`;
-        return `
-            <div class="heatmap-cell" style="background:${bg};" aria-label="${tip}">
-                <div class="heatmap-tip">${tip}</div>
-            </div>`;
+        const c   = dayCounts[day] || 0;
+        const alpha = c === 0 ? 0 : Math.max(0.18, c / max);
+        const bg  = c === 0 ? 'var(--card2)' : `rgba(79,152,163,${alpha.toFixed(2)})`;
+        const obj = new Date(day + 'T12:00:00');
+        const tip = `${dn[obj.getDay()]} ${String(obj.getDate()).padStart(2,'0')}.${String(obj.getMonth()+1).padStart(2,'0')} — ${c} сообщ.`;
+        return `<div class="heatmap-cell" style="background:${bg}" title="${tip}"><div class="heatmap-cell-tooltip">${tip}</div></div>`;
     }).join('');
 }
 
-// ── Линейный график (14 дней) ─────────────────────────────────
-
-function _renderTimelineChart(messages) {
+// ── Chart: Timeline ───────────────────────────────────────────────────────
+function _renderTimeline(messages) {
     const canvas = document.getElementById('chartTimeline');
     if (!canvas) return;
-    if (typeof Chart === 'undefined') return;
-
     const dayCounts = {};
     messages.forEach(m => {
-        const d = m.created_at.slice(0,10);
+        const d = m.created_at.slice(0, 10);
         dayCounts[d] = (dayCounts[d] || 0) + 1;
     });
-
-    const labels = [];
-    const data = [];
+    const labels = [], data = [];
     for (let i = 13; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const key = d.toISOString().slice(0,10);
-        labels.push(`${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`);
-        data.push(dayCounts[key] || 0);
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const k = d.toISOString().slice(0, 10);
+        labels.push(`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`);
+        data.push(dayCounts[k] || 0);
     }
-
-    const trend = data.map((_,i) => {
-        const slice = data.slice(Math.max(0,i-1), i+2);
-        return Math.round(slice.reduce((a,b) => a+b, 0) / slice.length);
+    const trend = data.map((_, i) => {
+        const sl = data.slice(Math.max(0, i - 1), i + 2);
+        return Math.round(sl.reduce((a, b) => a + b, 0) / sl.length);
     });
 
-    _destroyChart('timeline');
-    const opts = _baseOpts();
+    destroyChart('timeline');
+    const opts = baseOptions();
     _charts['timeline'] = new Chart(canvas, {
         type: 'line',
         data: {
@@ -371,9 +225,9 @@ function _renderTimelineChart(messages) {
                 {
                     label: 'Тренд',
                     data: trend,
-                    borderColor: 'rgba(255,255,255,0.22)',
+                    borderColor: 'rgba(255,255,255,0.25)',
                     borderWidth: 1.5,
-                    borderDash: [4,4],
+                    borderDash: [4, 4],
                     pointRadius: 0,
                     fill: false,
                     tension: 0.4,
@@ -384,30 +238,20 @@ function _renderTimelineChart(messages) {
             ...opts,
             plugins: {
                 ...opts.plugins,
-                legend: {
-                    display: true,
-                    labels: { color: TEXT_COLOR, font: { size: 11 }, boxWidth: 12, padding: 12 }
-                },
-                tooltip: {
-                    ...opts.plugins.tooltip,
-                    callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}` }
-                }
+                legend: { display: true, labels: { color: TEXT_COL, font: { size: 11 }, boxWidth: 12, padding: 12 } },
+                tooltip: { ...opts.plugins.tooltip, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}` } }
             }
         }
     });
 }
 
-// ── Утилиты ───────────────────────────────────────────────────
-
-function _fmtH(sec) {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    return h === 0 ? `${m}м` : `${h}ч ${m}м`;
+// ── Utils ─────────────────────────────────────────────────────────────────
+function _fmtH(s) {
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return h > 0 ? `${h}ч ${m}м` : `${m}м`;
 }
-
-function _fmtD(sec) {
-    if (!sec) return '0м';
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
+function _fmtD(s) {
+    if (!s) return '0м';
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
     return h > 0 ? `${h}ч ${m}м` : `${m}м`;
 }

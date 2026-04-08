@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Мониторинг группы</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
 
@@ -113,32 +112,24 @@
         <div class="card" id="statsCard">
             <div class="section-title">📊 Моя статистика</div>
 
-            <!-- Плитки -->
             <div id="statsKpis" class="stats-kpis"></div>
 
-            <!-- Активность по часам -->
             <div class="stats-section">
                 <div class="stats-section-title">⏰ Активность по часам суток</div>
                 <div class="stats-section-sub">Когда ты пишешь в чат чаще всего</div>
-                <div class="chart-wrap">
-                    <canvas id="chartHourly"></canvas>
-                </div>
+                <div class="chart-wrap"><canvas id="chartHourly"></canvas></div>
             </div>
 
-            <!-- Тепловая карта по дням -->
             <div class="stats-section">
                 <div class="stats-section-title">📅 Активность по дням (последние 30 дней)</div>
                 <div class="stats-section-sub">Каждая ячейка — количество сообщений за день</div>
                 <div id="heatmapGrid" class="heatmap-grid"></div>
             </div>
 
-            <!-- Динамика сессий по дням -->
             <div class="stats-section">
                 <div class="stats-section-title">📈 Сообщения по дням (последние 14 дней)</div>
                 <div class="stats-section-sub">Линейный тренд активности в чате</div>
-                <div class="chart-wrap">
-                    <canvas id="chartTimeline"></canvas>
-                </div>
+                <div class="chart-wrap"><canvas id="chartTimeline"></canvas></div>
             </div>
         </div>
 
@@ -173,6 +164,7 @@
     </div>
 
     <script type="module" src="main.js"></script>
+    <script type="module" src="analytics-boot.js"></script>
 </body>
 
 </html>

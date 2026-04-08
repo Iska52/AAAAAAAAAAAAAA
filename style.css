@@ -47,17 +47,17 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 
 /* ─── PROFILE ───────────────────────────────────────────────────────────── */
 .profile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.profile-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.profile-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; color: #fff; }
 .profile-name { font-size: 16px; font-weight: 700; }
 .profile-online { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
 .profile-achievements { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 0; }
 .profile-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
 .profile-stat { background: var(--card2); border-radius: var(--radius-sm); padding: 8px 4px; text-align: center; }
-.profile-stat-value { font-size: 15px; font-weight: 700; }
+.profile-stat-value { font-size: 15px; font-weight: 700; color: var(--text); }
 .profile-stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: .04em; }
 
 /* ─── MINI ACHIEVEMENTS ─────────────────────────────────────────────────── */
-.mini-achievement { display: flex; align-items: center; gap: 4px; background: var(--card2); border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
+.mini-achievement { display: flex; align-items: center; gap: 4px; background: var(--card2); border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--text); }
 .mini-common    { border: 1px solid rgba(255,255,255,.12); }
 .mini-rare      { border: 1px solid #3b82f6; color: #93c5fd; }
 .mini-epic      { border: 1px solid #a855f7; color: #d8b4fe; }
@@ -65,8 +65,19 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 
 /* ─── STATUS GRID ───────────────────────────────────────────────────────── */
 .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 12px; }
-.status-pill { display: flex; align-items: center; gap: 7px; padding: 9px 12px; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; color: var(--text); }
-.status-pill:hover, .status-pill.active { background: rgba(79,152,163,.18); border-color: var(--accent); }
+.status-pill {
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 12px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    color: var(--text);          /* ← FIX: always light text */
+}
+.status-pill:hover  { background: rgba(79,152,163,.18); border-color: var(--accent); color: var(--text); }
+.status-pill.active { background: rgba(79,152,163,.18); border-color: var(--accent); color: var(--text); }
 .status-pill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .dot-green  { background: #28a745; }
 .dot-yellow { background: #f4bf08; }
@@ -91,7 +102,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .group-list { display: flex; flex-direction: column; gap: 8px; }
 .user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--card2); border-radius: var(--radius-sm); }
 .user-left { display: flex; align-items: center; gap: 9px; }
-.user-name { font-weight: 600; font-size: 14px; }
+.user-name { font-weight: 600; font-size: 14px; color: var(--text); }
 .user-right { text-align: right; }
 .user-status { font-size: 12px; color: var(--muted); }
 .study-time { font-size: 11px; color: var(--accent); margin-top: 2px; }
@@ -110,7 +121,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .leader-left { display: flex; align-items: center; gap: 9px; }
 .leader-rank { font-size: 18px; width: 28px; text-align: center; }
 .leader-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
-.leader-name { font-weight: 600; font-size: 14px; }
+.leader-name { font-weight: 600; font-size: 14px; color: var(--text); }
 .leader-sub { font-size: 11px; color: var(--muted); }
 .leader-right { font-size: 13px; font-weight: 700; color: var(--accent); }
 
@@ -127,14 +138,14 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .achievement-card-head { position: relative; display: inline-flex; margin-bottom: 6px; }
 .achievement-icon { font-size: 26px; }
 .achievement-lock { position: absolute; bottom: -2px; right: -4px; font-size: 12px; }
-.achievement-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.achievement-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
 .achievement-desc { font-size: 11px; color: var(--muted); margin-bottom: 5px; line-height: 1.4; }
 .achievement-rarity { font-size: 10px; letter-spacing: .06em; color: var(--muted); }
 
 /* ─── CHAT ──────────────────────────────────────────────────────────────── */
-.section-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.section-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
 .chat-box { height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; padding-right: 2px; }
-.chat-line { font-size: 13px; line-height: 1.45; padding: 4px 0; }
+.chat-line { font-size: 13px; line-height: 1.45; padding: 4px 0; color: var(--text); }
 .chat-form { display: flex; gap: 7px; }
 .chat-input { flex: 1; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; color: var(--text); outline: none; transition: border-color .15s; }
 .chat-input:focus { border-color: var(--accent); }
@@ -144,10 +155,10 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 /* ─── STATUS MENU ───────────────────────────────────────────────────────── */
 .menu-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 100; display: flex; align-items: flex-end; }
 .menu-sheet { background: var(--card); border-radius: var(--radius) var(--radius) 0 0; padding: 20px 16px 28px; width: 100%; max-width: 480px; margin: 0 auto; }
-.menu-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; text-align: center; }
+.menu-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; text-align: center; color: var(--text); }
 .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .status-option { padding: 14px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card2); font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: background .15s; color: var(--text); }
-.status-option:hover { background: rgba(79,152,163,.2); }
+.status-option:hover { background: rgba(79,152,163,.2); color: var(--text); }
 .opt-study { border-color: rgba(40,167,69,.35); }
 .opt-break { border-color: rgba(244,191,8,.35); }
 .opt-game  { border-color: rgba(23,162,184,.35); }
@@ -162,7 +173,6 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
    КАРТОЧКА СТАТИСТИКИ
 ════════════════════════════════════════════════════════════════════════ */
 
-/* KPI-плитки */
 .stats-kpis {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -174,13 +184,16 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     border-radius: var(--radius-sm);
     padding: 12px 10px;
     text-align: center;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(79,152,163,.2);
+    transition: transform .15s;
 }
+.stats-kpi:hover { transform: translateY(-2px); }
 .stats-kpi-value {
     font-size: 20px;
     font-weight: 800;
     color: #fff;
     margin-bottom: 3px;
+    font-variant-numeric: tabular-nums;
 }
 .stats-kpi-label {
     font-size: 10px;
@@ -194,7 +207,6 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     margin-top: 2px;
 }
 
-/* Секция с заголовком */
 .stats-section {
     margin-bottom: 20px;
 }
@@ -202,6 +214,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     font-size: 13px;
     font-weight: 700;
     margin-bottom: 3px;
+    color: var(--text);
 }
 .stats-section-sub {
     font-size: 11px;
@@ -209,7 +222,6 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     margin-bottom: 10px;
 }
 
-/* Обёртка canvas */
 .chart-wrap {
     position: relative;
     width: 100%;
@@ -220,7 +232,6 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     height: 160px !important;
 }
 
-/* Тепловая карта */
 .heatmap-grid {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -251,3 +262,15 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     z-index: 10;
 }
 .heatmap-cell:hover .heatmap-cell-tooltip { display: block; }
+
+/* skeleton shimmer */
+@keyframes _shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+}
+.stats-skeleton {
+    background: linear-gradient(90deg, var(--card2) 25%, #2a2a30 50%, var(--card2) 75%);
+    background-size: 200% 100%;
+    animation: _shimmer 1.4s ease infinite;
+    border-radius: var(--radius-sm);
+}

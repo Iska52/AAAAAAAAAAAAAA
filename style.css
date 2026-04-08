@@ -65,7 +65,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 
 /* ─── STATUS GRID ───────────────────────────────────────────────────────── */
 .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 12px; }
-.status-pill { display: flex; align-items: center; gap: 7px; padding: 9px 12px; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; }
+.status-pill { display: flex; align-items: center; gap: 7px; padding: 9px 12px; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s, border-color .15s; color: var(--text); }
 .status-pill:hover, .status-pill.active { background: rgba(79,152,163,.18); border-color: var(--accent); }
 .status-pill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .dot-green  { background: #28a745; }
@@ -146,7 +146,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .menu-sheet { background: var(--card); border-radius: var(--radius) var(--radius) 0 0; padding: 20px 16px 28px; width: 100%; max-width: 480px; margin: 0 auto; }
 .menu-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; text-align: center; }
 .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.status-option { padding: 14px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card2); font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: background .15s; }
+.status-option { padding: 14px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card2); font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: background .15s; color: var(--text); }
 .status-option:hover { background: rgba(79,152,163,.2); }
 .opt-study { border-color: rgba(40,167,69,.35); }
 .opt-break { border-color: rgba(244,191,8,.35); }

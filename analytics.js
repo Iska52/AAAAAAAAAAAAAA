@@ -9,6 +9,9 @@ const ACCENT_DIM = 'rgba(79,152,163,0.18)';
 const GRID_COL   = 'rgba(255,255,255,0.07)';
 const TEXT_COL   = 'rgba(255,255,255,0.45)';
 
+// Chart.js загружен как UMD (не ESM), поэтому доступен через window.Chart
+function getChart() { return window.Chart; }
+
 const _charts = {};
 function destroyChart(id) {
     if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
@@ -37,7 +40,7 @@ function baseOptions() {
     };
 }
 
-// ── Public ────────────────────────────────────────────────────────────────
+// ── Public ────────────────────────────────────────────────────────────────────
 export async function renderAnalytics(userId) {
     if (!userId) return;
     _showSkeletons();
@@ -52,7 +55,7 @@ export async function renderAnalytics(userId) {
     _renderTimeline(messages);
 }
 
-// ── Data ──────────────────────────────────────────────────────────────────
+// ── Data ─────────────────────────────────────────────────────────────────────
 async function _fetchProfile(uid) {
     const { data, error } = await _sb
         .from('profiles')
@@ -72,7 +75,7 @@ async function _fetchMessages(uid) {
     return data || [];
 }
 
-// ── Skeletons / Error ─────────────────────────────────────────────────────
+// ── Skeletons / Error ───────────────────────────────────────────────────────
 function _showSkeletons() {
     const el = document.getElementById('statsKpis');
     if (!el) return;
@@ -85,7 +88,7 @@ function _showError() {
     if (el) el.innerHTML = `<div class="muted" style="grid-column:span 2">Не удалось загрузить статистику</div>`;
 }
 
-// ── KPIs ──────────────────────────────────────────────────────────────────
+// ── KPIs ──────────────────────────────────────────────────────────────────────
 function _renderKpis(profile, messages) {
     const el = document.getElementById('statsKpis');
     if (!el) return;
@@ -120,10 +123,13 @@ function _renderKpis(profile, messages) {
     `).join('');
 }
 
-// ── Chart: Hourly ─────────────────────────────────────────────────────────
+// ── Chart: Hourly ───────────────────────────────────────────────────────────────
 function _renderHourly(messages) {
     const canvas = document.getElementById('chartHourly');
     if (!canvas) return;
+    const C = getChart();
+    if (!C) { console.error('[analytics] Chart.js не готов'); return; }
+
     const counts = new Array(24).fill(0);
     messages.forEach(m => counts[new Date(m.created_at).getHours()]++);
     const max    = Math.max(...counts, 1);
@@ -132,7 +138,7 @@ function _renderHourly(messages) {
 
     destroyChart('hourly');
     const opts = baseOptions();
-    _charts['hourly'] = new Chart(canvas, {
+    _charts['hourly'] = new C(canvas, {
         type: 'bar',
         data: {
             labels,
@@ -156,7 +162,7 @@ function _renderHourly(messages) {
     });
 }
 
-// ── Heatmap ───────────────────────────────────────────────────────────────
+// ── Heatmap ───────────────────────────────────────────────────────────────────────
 function _renderHeatmap(messages) {
     const grid = document.getElementById('heatmapGrid');
     if (!grid) return;
@@ -182,10 +188,13 @@ function _renderHeatmap(messages) {
     }).join('');
 }
 
-// ── Chart: Timeline ───────────────────────────────────────────────────────
+// ── Chart: Timeline ───────────────────────────────────────────────────────────────
 function _renderTimeline(messages) {
     const canvas = document.getElementById('chartTimeline');
     if (!canvas) return;
+    const C = getChart();
+    if (!C) { console.error('[analytics] Chart.js не готов'); return; }
+
     const dayCounts = {};
     messages.forEach(m => {
         const d = m.created_at.slice(0, 10);
@@ -205,7 +214,7 @@ function _renderTimeline(messages) {
 
     destroyChart('timeline');
     const opts = baseOptions();
-    _charts['timeline'] = new Chart(canvas, {
+    _charts['timeline'] = new C(canvas, {
         type: 'line',
         data: {
             labels,
@@ -245,7 +254,7 @@ function _renderTimeline(messages) {
     });
 }
 
-// ── Utils ─────────────────────────────────────────────────────────────────
+// ── Utils ───────────────────────────────────────────────────────────────────────
 function _fmtH(s) {
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
     return h > 0 ? `${h}ч ${m}м` : `${m}м`;
